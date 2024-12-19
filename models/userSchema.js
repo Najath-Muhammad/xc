@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
-const { search } = require('../app');
 const {Schema} = mongoose;
 
 const userSchema = new Schema({
-    name:{
+    fullname:{
         type:String,
         required :true
     },
@@ -14,18 +13,18 @@ const userSchema = new Schema({
     },
     phone :{
         type: String,
-        required: false,
+        required: true,
         unique:false,
-        sparse:true,
+        sparse:false,
         default: null
     },
     googleId:{
         type:String,
-        unique:true
+        unique:false
     },
     password:{
         type: String,
-        required:false
+        required:true
     },
     isBlocked: {
         type: Boolean,
