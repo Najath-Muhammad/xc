@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .admin-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .admin-container h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .admin-container form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-container input {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .admin-container input:focus {
+            border-color: #00aaff;
+            outline: none;
+            box-shadow: 0 0 5px #00aaff;
+        }
+
+        .admin-container button {
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .admin-container button:hover {
+            background: linear-gradient(to right, #ff8f85, #ff9bba);
+        }
+
+        .admin-container .footer {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .admin-container .footer a {
+            color: #00aaff;
+            text-decoration: none;
+        }
+
+        .admin-container .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Admin Login</h1>
+        <form action="/admin/login" method="post">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <% if (message) { %>
+                <p style="color: red;"><%= message %></p>
+            <% } %>
+            <button type="submit">Login</button>
+        </form>
+        <div class="footer">
+            Forgot your password? <a href="#">Reset it here</a>
+        </div>
+    </div>
+</body>
+</html>

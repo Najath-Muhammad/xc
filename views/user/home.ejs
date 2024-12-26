@@ -73,8 +73,18 @@
                     <div class="col-lg-6 col-md-5">
                         <div class="header__top__right">
                             <div class="header__top__links">
-                                <a href="/signup" >Sign Up</a>
-                                <a href="/login" >Log In</a>
+                                <%if(locals.user){%>
+                                    <div class="dropdown">
+                                        <a href="#" class="sing-in-link"><%=locals.user.fullname%></a>
+                                        <div class="dropdown-content">
+                                            <a href="/user/profile">Profile</a>
+                                            <a href="/logout">Logout</a>
+                                        </div>
+                                    </div>
+                                <%}else {%>
+                                    <a href="/signup" >Sign Up</a>
+                                    <a href="/login" >Log In</a>
+                                <%}%>
                                 <a href="#">FAQs</a>
                             </div>
                             <div class="header__top__hover">
@@ -138,8 +148,8 @@
                     <div class="row">
                         <div class="col-xl-5 col-lg-7 col-md-8">
                             <div class="hero__text">
-                                <h6>Summer Collection</h6>
-                                <h2>Fall - Winter Collections 2030</h2>
+                                <h6>Best Collections</h6>
+                                <h2>Christmas 2030 Offers</h2>
                                 <p>A specialist label creating luxury essentials. Ethically crafted with an unwavering
                                 commitment to exceptional quality.</p>
                                 <a href="#" class="primary-btn">Shop now <span class="arrow_right"></span></a>
@@ -159,8 +169,8 @@
                     <div class="row">
                         <div class="col-xl-5 col-lg-7 col-md-8">
                             <div class="hero__text">
-                                <h6>Summer Collection</h6>
-                                <h2>Fall - Winter Collections 2030</h2>
+                                <h6>Best Collection</h6>
+                                <h2>Christmas Offer Collections 2030</h2>
                                 <p>A specialist label creating luxury essentials. Ethically crafted with an unwavering
                                 commitment to exceptional quality.</p>
                                 <a href="#" class="primary-btn">Shop now <span class="arrow_right"></span></a>

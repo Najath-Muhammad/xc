@@ -63,11 +63,22 @@
                 <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
                 <div class="validation-messages" id="confirmPasswordValidation"></div>
             </div>
+            <%if(locals.message && message.length>0){%>
+                <div class="alert alert-danger text-center" id="err-div">
+                    <%=message%>
+                </div>
+            <%}%>
             <div class="d-grid">
                 <button type="submit" class="btn btn-primary">Signup</button>
             </div>
             <div class="login-link">
-                <p>Already registered? <a href="#">Log in here</a></p>
+                <div class="social-btns">
+                    <p>
+                        Or Signup With Google
+                    </p>
+                    <a type="button" class="btn btn-outline-primary" href="/auth/google">Google</a>
+                </div>
+                <p>Already registered? <a href="/login">Log in here</a></p>
             </div>
         </form>
     </div>

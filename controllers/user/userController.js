@@ -8,7 +8,7 @@ const bcrypt = require('bcrypt');
 
 const pageNotFound =async (req,res) => {
     try{
-        
+        res.render('page-404')
     }
     catch(error){
         res.redirect('/pageNotFound'); 
@@ -20,7 +20,15 @@ const pageNotFound =async (req,res) => {
 
 const loadHomepage = async (req,res)=>{
     try{
-        return res.render('home')
+        const user = req.session.user;
+        if(user){
+            const userData = await User.findOne({id:user.id});
+            res.render('home', {user:userData});
+        }
+        else{
+            res.render('home');
+        }
+       // return res.render('home')
     }
     catch(error){
       console.log('home page not found');
@@ -92,9 +100,10 @@ const signUp = async (req,res)=>{
        else{
         req.session.userOtp = otp;
         req.session.userData = {fullname,email,phone,password}
- 
-        res.render('verify-otp');
+        
         console.log("OTP sent",otp);
+        return res.render('verify-otp');
+       
        }
       
     }
@@ -104,7 +113,7 @@ const signUp = async (req,res)=>{
     }
 }
 
-
+//hashing password
 const securePassword = async (password)=>{
   try {
     const passworHash = await bcrypt.hash(password,10)
@@ -115,6 +124,8 @@ const securePassword = async (password)=>{
   }
 }
 
+
+//varifying otp
 const varifyOtp =async(req,res)=>{
     try{
         const {otp} = req.body;
@@ -145,7 +156,67 @@ const varifyOtp =async(req,res)=>{
 }
 
 
+const loadLogin = async (req,res)=>{
+    try {
+        if(!req.session.user){
+            return res.render('login');
+        }
+        else{
+            res.redirect('/')
+        }
+    } catch (error) {
+        res.redirect('/pageNotFound')
+    }
+}
+
+const login = async (req,res)=>{
+    try {
+        const {email,password} = req.body;
+        const findUser = await User.findOne({isAdmin:0,email:email});
+
+        if(!findUser){
+            return res.render('login',{message:'User not Found'});
+        }
+        if(findUser.isBlocked){
+            return res.render('login',{message:'Your account is blocked'})
+        }
+
+        const passwordMatch = await bcrypt.compare(password,findUser.password); //checking passwords
+
+        if(!passwordMatch){
+            return res.render('login',{message:'Invalid Password'});
+        }
+
+        req.session.user = findUser.id;
+        res.redirect('/')
+
+    } catch (error) {
+        console.log('login error');
+        res.render('login',{message:"login failed, Please try again"})
+    }
+}
+
+const logout = async (req,res)=>{
+    try {
+        
+        req.session.destroy((err)=>{
+            if(err){
+                console.log('session destruction error',err.message);
+                return res.redirect('/pageNotFound')
+            }
+            return res.redirect('/login')
+        })
+
+    } catch (error) {
+    
+        console.log('logout error',error);
+        res.redirect('/pageNotFound')
+        
+    }
+
+}
+
 
 module.exports = {
-    loadHomepage,pageNotFound,loadSignup,signUp,varifyOtp
+    loadHomepage,pageNotFound,loadSignup,signUp,varifyOtp,loadLogin,login,logout
 }

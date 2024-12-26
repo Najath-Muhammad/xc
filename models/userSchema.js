@@ -13,18 +13,18 @@ const userSchema = new Schema({
     },
     phone :{
         type: String,
-        required: true,
-        unique:false,
-        sparse:false,
+        required: false,
+        unique:true,
+        sparse:true,
         default: null
     },
     googleId:{
         type:String,
-        unique:false
+        unique:true
     },
     password:{
         type: String,
-        required:true
+        required:false
     },
     isBlocked: {
         type: Boolean,
