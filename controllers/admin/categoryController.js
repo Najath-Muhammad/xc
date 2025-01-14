@@ -5,36 +5,38 @@ const Products = require('../../models/productSchema');
 
 
 
-const categoryInfo = async (req,res) => {
+const categoryInfo = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;         
+        const page = parseInt(req.query.page) || 1;
         const limit = 4;
         const skip = (page - 1) * limit;
 
+        console.log(`Page: ${page}, Limit: ${limit}, Skip: ${skip}`);
+
         const categoryData = await Category.find({})
-        .sort({ createdAt: -1 })
-        .skip({})
-        .limit(limit);
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
         const totalCategories = await Category.countDocuments({});
         const totalPages = Math.ceil(totalCategories / limit);
-        res.render('category',{
-            cat:categoryData,
-            currentPage:page,
-            totalPages:totalPages,
+
+        console.log(`Total Categories: ${totalCategories}, Total Pages: ${totalPages}`);
+
+        res.render('category', {
+            cat: categoryData,
+            currentPage: page,
+            totalPages: totalPages,
             totalCategories: totalCategories,
-            errors:null,
-            oldData:null
-        })
-        
+            errors: null,
+            oldData: null
+        });
+
     } catch (error) {
-        
-        console.log(error);
-        res.redirect('/pageError')
-
+        console.error(error);
+        res.redirect('/pageError');
     }
-}
-
+};
 
 const addCategory = async (req,res) => {
     
@@ -75,13 +77,13 @@ const addCategoryOffer = async (req, res) => {
         }
 
         const products = await Products.find({ category: category._id });
-        const hasProductOffer = products.some((product) => product.productOffer > percentage);
+        // const hasProductOffer = products.some((product) => product.productOffer > percentage);
 
-        if (hasProductOffer) {
-            return res
-                .status(400)
-                .json({ error: 'A product in this category already has a higher offer' });
-        }
+        // if (hasProductOffer) {
+        //     return res
+        //         .status(400)
+        //         .json({ error: 'A product in this category already has a higher offer' });
+        // }
 
         await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
         for (const product of products) {
@@ -143,19 +145,18 @@ const removeCategoryOffer = async (req, res) => {
 };
 
 
-// Controller to list the category
+
 const getListCategory = async (req, res) => {
     try {
-        const { categoryId } = req.params; // Get categoryId from the route parameter
-        const category = await Category.findById(categoryId); // Find category by id
+        const { categoryId } = req.params;
+        const category = await Category.findById(categoryId);
 
         if (!category) {
             return res.status(400).json({ success: false, message: 'Category not found' });
         }
 
-        // Update the category's 'isListed' status to true (it was probably false before)
         category.isListed = true;
-        await category.save(); // Save the updated category
+        await category.save(); 
 
         res.json({ success: true, message: 'Category listed successfully!' });
     } catch (error) {
@@ -165,27 +166,35 @@ const getListCategory = async (req, res) => {
 };
 
 
-// Controller to unlist the category
+
 const getUnListCategory = async (req, res) => {
     try {
-        const { categoryId } = req.params; // Get categoryId from the route parameter
-        const category = await Category.findById(categoryId); // Find category by id
+        const { categoryId } = req.params;
+        console.log(`Received request to unlist category with ID: ${categoryId}`);
 
+        const category = await Category.findById(categoryId);
         if (!category) {
+            console.log(`Category with ID: ${categoryId} not found`);
             return res.status(400).json({ success: false, message: 'Category not found' });
         }
 
-        // Update the category's 'isListed' status to false (it was probably true before)
+        if (!category.description) {
+            category.description = 'No description provided';
+        }
+
+        console.log(`Unlisting category: ${category.name}`);
         category.isListed = false;
-        await category.save(); // Save the updated category
+        await category.save();
+
+        console.log(`Updating products in category: ${category.name}`);
+        await Products.updateMany({ category: category._id }, { $set: { isBlocked: true } });
 
         res.json({ success: true, message: 'Category unlisted successfully!' });
     } catch (error) {
-        console.error(error);
+        console.error('Error during unlisting category:', error);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
-
 
 const getEditCategory = async (req,res) => {
     try {
@@ -199,39 +208,32 @@ const getEditCategory = async (req,res) => {
 
 const editCategory = async (req, res) => {
     try {
-        const id = req.params.id;  // Retrieve the category ID from route parameters
-        const { categoryname, description } = req.body;  // Get category data from the body
+        const id = req.params.id; 
+        const { categoryname, description } = req.body;
 
-        // Log the inputs for debugging
         console.log('Category ID:', id);
         console.log('Category Name:', categoryname);
         console.log('Category Description:', description);
 
-        // Check if a category with the same name already exists (excluding the current category)
         const existing = await Category.findOne({ name: categoryname });
         if (existing && existing._id.toString() !== id) {
             return res.status(400).json({ success: false, error: 'Category name already exists' });
         }
 
-        // Find the category by ID and update it
+       
         const updateCategory = await Category.findByIdAndUpdate(
-            id,  // Use the ID from route params
+            id, 
             { name: categoryname, description: description },
-            { new: true }  // Return the updated document
+            { new: true }
         );
 
-        // Log the result of the update for debugging
         console.log('Update Result:', updateCategory);
-
-        // If no category was found or updated, return an error
         if (!updateCategory) {
             return res.status(400).json({ success: false, error: 'Category not found or no changes made' });
         }
-
-        // Redirect to the category page if the update was successful
         res.redirect('/admin/category');
     } catch (error) {
-        console.error("Error in editCategory:", error); // Log the error for debugging
+        console.error("Error in editCategory:", error); 
         res.status(500).json({ success: false, error: 'Internal server error' });
     }
 };

@@ -1586,8 +1586,17 @@ ol {
 }
 
 .product__details__pic__item {
-	position: relative;
+	max-width: 500px; /* Adjust width as needed */
+    width: 100%;
+    margin: auto;
+    text-align: center;
 }
+.product__details__pic__item img {
+    width: 100%; /* Make the image responsive */
+    height: auto; /* Preserve aspect ratio */
+    display: block;
+}
+
 
 .product__details__pic__item a {
 	height: 56px;

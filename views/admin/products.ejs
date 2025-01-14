@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(to bottom, #4facfe, #00f2fe);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 15px 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .main-content {
+            margin-left: 270px;
+            padding: 20px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .no-products {
+            text-align: center;
+            margin-top: 20px;
+            color: #777;
+        }
+        
+        .table thead th {
+            text-align: center;
+        }
+
+        .table tbody td {
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="/admin/dashboard">Dashboard</a></li>
+            <li><a href="/admin/users">User</a></li>
+            <li><a href="#">Order</a></li>
+            <li><a href="/admin/addProducts">Add Products</a></li>
+            <li><a href="/admin/products">Products</a></li>
+            <li><a href="/admin/brands">Brands</a></li>
+            <li><a href="/admin/category">Category</a></li>
+            <li><a href="#">Offers</a></li>
+            <li><a href="#">Coupons</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <button class="logout-btn" onclick="window.location.href='/admin/logout';">Logout</button>
+        <div class="container mt-5">
+            <h1 class="text-center mb-4">Products</h1>
+
+            <!-- Search Bar -->
+            <form class="search-bar" action="/admin/products" method="GET">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Search by product name or brand" value="<%= search || '' %>">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </div>
+            </form>
+
+            <!-- Product List Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Brand</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Offer</th>
+                            <th>Actions</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (data.length > 0) { %>
+                            <% data.forEach(function(product) { %>
+                                <tr>
+                                    <td><%= product.productName %></td>
+                                    <td><%= product.brand %></td>
+                                    <td><%= product.category ? product.category.name : 'N/A' %></td>
+                                    <td><%= product.salePrice %></td>
+                                    <td><%= product.quantity %></td>
+                                    <td><%= product.productOffer %></td>
+                                    <td>
+                                           
+                                        <div class="action-buttons">
+                                            <%if(product.productOffer === 0){%>
+                                                <a href="" class="btn btn-success btn-sm" onclick="addOffer('<%=product._id%>',event)">Add Offer</a>
+                                            <%}else{%>
+                                                <a href=""class="btn btn-success btn-sm" onclick="removeOffer('<%=product._id%>',event)">Remove Offer</a>
+                                            <%}%>
+                                            <% if (product.isBlocked === false) { %>
+                                                <a href="/admin/blockProducts?id=<%= product.id %>" class="btn btn-warning btn-sm">Block</a>
+                                            <% } else { %>   
+                                                <a href="/admin/unBlockProducts?id=<%= product.id %>" class="btn btn-warning btn-sm">Unblock</a>
+                                            <% } %> 
+                                            <a href="/admin/editProducts?id=<%= product.id %>" class="btn btn-primary btn-sm">Edit</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="no-products">
+                                    <p>No products found.</p>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination">
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+       async function addOffer(productId, event) {
+            event.preventDefault();
+
+            const { value: amount } = await Swal.fire({
+                title: 'Offer In Percentage',
+                input: 'number',
+                inputLabel: 'percentage',
+                inputPlaceholder: "%"
+            });
+
+            if (amount) {
+                $.ajax({
+                    url: '/admin/addProductOffer',
+                    method: 'POST',
+                    data: {
+                        percentage: amount,
+                        productId: productId
+                    },
+                    success: (response) => {
+                        if (response.status === true) {
+                            Swal.fire('Offer Added', 'The offer has been added', 'success')
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire('Failed', response.message || 'Failed to add the offer', 'error');
+                        }
+                    },
+                    error: (xhr, status, error) => {
+                        console.error('AJAX Error: ', status, error);
+                        Swal.fire('Error', 'An error occurred while adding the offer', 'error');
+                    }
+                });
+            }
+        }
+    async function removeOffer(productId, event) {
+        event.preventDefault(); 
+
+        Swal.fire({
+            title: "Remove Offer",
+            text: "Are you sure you want to remove the offer?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, remove it!",
+            timer: 5000,
+            timerProgressBar: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/admin/removeProductOffer',
+                    method: 'POST',
+                    data: {
+                        productId: productId
+                    },
+                    success: (response) => {
+                        if (response.status === true) {
+                            Swal.fire('Removed', 'Offer removed', 'success')
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire('Failed', response.message || 'Failed to remove the offer', 'error');
+                        }
+                    },
+                    error: (xhr, status, error) => {
+                        console.error('AJAX Error: ', status, error);
+                        Swal.fire('Error', 'An error occurred while removing the offer', 'error');
+                    }
+                });
+            }
+        });
+    }
+    </script>
+</body>
+</html>

@@ -41,23 +41,23 @@ const User = require('../../models/userSchema');
 
 const userInfo = async (req, res) => {
     try {
-        let search = req.query.search || '';  // Get search query, default to empty string
-        let page = parseInt(req.query.page) || 1;  // Get page number, default to 1
-        const limit = 3;  // Set limit per page
+        let search = req.query.search || '';  
+        let page = parseInt(req.query.page) || 1;  
+        const limit = 3; 
 
-        // Query to fetch users based on search input
+        
         const userData = await User.find({
             isAdmin: false,
             $or: [
-                { fullname: { $regex: '.*' + search + '.*', $options: 'i' } },  // Case-insensitive search
+                { fullname: { $regex: '.*' + search + '.*', $options: 'i' } },  
                 { email: { $regex: '.*' + search + '.*', $options: 'i' } }
             ]
         })
-            .limit(limit)  // Limit the number of results per page
-            .skip((page - 1) * limit)  // Skip results based on current page
+            .limit(limit)  
+            .skip((page - 1) * limit)  
             .exec();
 
-        // Get the total count of users matching the search query
+       
         const count = await User.find({
             isAdmin: false,
             $or: [
@@ -66,10 +66,10 @@ const userInfo = async (req, res) => {
             ]
         }).countDocuments();
 
-        // Calculate the total number of pages
+       
         const totalPages = Math.ceil(count / limit);
 
-        // Render the users page and pass data to the template
+        
         res.render('users', {
             userData,
             search,
@@ -79,7 +79,7 @@ const userInfo = async (req, res) => {
         });
     } catch (error) {
         console.log('Error fetching user data:', error);
-        res.redirect('/pageError');  // Redirect to an error page if something goes wrong
+        res.redirect('/pageError');  
     }
 };
 
@@ -95,7 +95,7 @@ const userInfo = async (req, res) => {
 //     }
 // };
 
-// Controller to block a user
+
 const blockUser = async (req, res) => {
     try {
         const userId = req.params.id;
@@ -103,6 +103,7 @@ const blockUser = async (req, res) => {
         if (user) {
             user.isBlocked = true;
             await user.save();
+            req.session.user = false;
             res.redirect('/admin/users');
         } else {
             res.status(404).send('User not found');
@@ -130,7 +131,7 @@ const unblockUser = async (req, res) => {
     }
 };
 
-// Controller to delete a user
+
 const deleteUser = async (req, res) => {
     try {
         const userId = req.params.id;

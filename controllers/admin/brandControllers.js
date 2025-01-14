@@ -37,13 +37,13 @@ const addBrand = async (req, res) => {
             });
 
             await newBrand.save();
-            return res.redirect('/admin/brands'); // Redirect to the correct route
+            return res.redirect('/admin/brands');
         }
 
-        // Brand already exists
+        
         return res.redirect('/admin/brands?error=Brand already exists');
     } catch (error) {
-        console.error('Error adding brand:', error); // Log error details
+        console.error('Error adding brand:', error); 
         res.redirect('/pageError');
     }
 };

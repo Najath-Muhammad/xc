@@ -1,4 +1,6 @@
 const User = require('../../models/userSchema');
+const Category =  require('../../models/categorySchema');
+const Product =  require('../../models/productSchema');
 const nodemailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
@@ -18,23 +20,31 @@ const pageNotFound =async (req,res) => {
 
 
 
-const loadHomepage = async (req,res)=>{
-    try{
+const loadHomepage = async (req, res) => {
+    try {
         const user = req.session.user;
-        if(user){
-            const userData = await User.findOne({id:user.id});
-            res.render('home', {user:userData});
+        const categories = await Category.find({ isListed: true });
+        let products = await Product.find({
+            isBlocked: false,
+            category: { $in: categories.map(category => category._id) },
+            quantity: { $gt: 0 }
+        });
+    
+  
+        products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        products = products.slice(0, 4);
+        // console.log(products);
+        if (user) {
+            const userData = await User.findOne({ id: user.id });
+            res.render('home', { user: userData, products: products });
+        } else {
+            res.render('home', { products: products });
         }
-        else{
-            res.render('home');
-        }
-       // return res.render('home')
+    } catch (error) {
+        console.error('Error loading homepage:', error);
+        res.status(500).send('Server error');
     }
-    catch(error){
-      console.log('home page not found');
-      res.status(500).send('server error')
-    }
-}
+};
 
 const loadSignup = async (req,res)=>{
     try{
@@ -47,12 +57,11 @@ const loadSignup = async (req,res)=>{
 }
 
 
-//otp generation
 function generateOtp(){
     return Math.floor(100000 + Math.random()*900000).toString();
 }
 
-//OTP varification
+
 async function sendVerification(email,otp){
     try {
         const transporter = nodemailer.createTransport({
@@ -99,7 +108,7 @@ const signUp = async (req,res)=>{
        }
        else{
         req.session.userOtp = otp;
-        req.session.userData = {fullname,email,phone,password}
+        req.session.user = {fullname,email,phone,password}
         
         console.log("OTP sent",otp);
         return res.render('verify-otp');
@@ -113,7 +122,7 @@ const signUp = async (req,res)=>{
     }
 }
 
-//hashing password
+
 const securePassword = async (password)=>{
   try {
     const passworHash = await bcrypt.hash(password,10)
@@ -125,25 +134,30 @@ const securePassword = async (password)=>{
 }
 
 
-//varifying otp
 const varifyOtp =async(req,res)=>{
     try{
-        const {otp} = req.body;
-        console.log(otp)
-        if(otp === req.session.userOtp){
-            const user = req.session.userData;
-            const passwordHash = await securePassword(user.password);
-
-            const saveUserData = new User({
-               fullname:user.fullname,
-               email:user.email,
-               phone:user.phone,
-               password:passwordHash
-            })
-
-            await saveUserData.save();
-            req.session.user = saveUserData._id;
-            res.json({success:true,redirectUrl:'/'})  //path after the signUp
+        if(!req.session.user){
+            const {otp} = req.body;
+            console.log(otp)
+            if(otp === req.session.userOtp){
+                const user = req.session.userData;
+                const passwordHash = await securePassword(user.password);
+    
+                const saveUserData = new User({
+                   fullname:user.fullname,
+                   email:user.email,
+                   phone:user.phone,
+                   password:passwordHash
+                })
+    
+                await saveUserData.save();
+                req.session.user = saveUserData._id;
+                res.json({success:true,redirectUrl:'/'})  
+            }
+            else{
+                res.redirect('/')
+            }
+        
         }
         else{
             res.status(400).json({success:false,message:'invalid OTP'})
@@ -155,6 +169,33 @@ const varifyOtp =async(req,res)=>{
     }
 }
 
+
+const resendOtp = async (req, res) => {
+    try {
+        if (!req.session.userData) {
+            res.status(400).json({ success: false, message: 'No user session found' });
+            return;
+        }
+
+        
+        const newOtp = generateOtp();
+        req.session.userOtp = newOtp;
+
+        console.log(`Generated OTP: ${newOtp}`);
+        
+        const user = req.session.userData;
+        const emailSent = await sendVerification(user.email, newOtp);
+
+        if (emailSent) {
+            res.json({ success: true, message: 'OTP resent successfully' });
+        } else {
+            res.status(500).json({ success: false, message: 'Failed to send OTP' });
+        }
+    } catch (error) {
+        console.error('Error Resending OTP', error);
+        res.status(500).json({ success: false, message: 'Internal Server error' });
+    }
+};
 
 const loadLogin = async (req,res)=>{
     try {
@@ -181,7 +222,7 @@ const login = async (req,res)=>{
             return res.render('login',{message:'Your account is blocked'})
         }
 
-        const passwordMatch = await bcrypt.compare(password,findUser.password); //checking passwords
+        const passwordMatch = await bcrypt.compare(password,findUser.password); 
 
         if(!passwordMatch){
             return res.render('login',{message:'Invalid Password'});
@@ -204,7 +245,7 @@ const logout = async (req,res)=>{
                 console.log('session destruction error',err.message);
                 return res.redirect('/pageNotFound')
             }
-            return res.redirect('/login')
+            return res.redirect('/')
         })
 
     } catch (error) {
@@ -217,6 +258,8 @@ const logout = async (req,res)=>{
 }
 
 
+
+
 module.exports = {
-    loadHomepage,pageNotFound,loadSignup,signUp,varifyOtp,loadLogin,login,logout
+    loadHomepage,pageNotFound,loadSignup,signUp,varifyOtp,resendOtp,loadLogin,login,logout
 }

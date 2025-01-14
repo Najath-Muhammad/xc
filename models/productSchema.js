@@ -15,7 +15,7 @@ const {Schema} = mongoose;
             required:true
         },
         category:{
-            type:String,
+            type:mongoose.Schema.Types.ObjectId,
             ref:"Category",
             required:true
         },
@@ -56,6 +56,6 @@ const {Schema} = mongoose;
 
     },{timestamps:true});
 
-    const Products = mongoose.model("Products", productSchema);
+    const Product = mongoose.model("Products", productSchema);
 
-    module.exports = Products;
+    module.exports = Product;

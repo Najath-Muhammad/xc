@@ -94,14 +94,14 @@
 <body>
     <div class="login-container">
         <h2>Welcome Back!</h2>
-        <form action="/login" method="post">
+        <form id="loginForm" action="/login" method="post" onsubmit="return validateForm()">
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <input type="email" id="email" name="email" placeholder="Enter your email">
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <input type="password" id="password" name="password" placeholder="Enter your password">
                 <%if(locals.message && message.length>0){%>
                     <div class="alert alert-danger text-center" id="err-div">
                         <%=message%>
@@ -109,11 +109,41 @@
                 <%}%>
             </div>
             <button type="submit" class="btn">Login</button>
-            <button type="button" class="btn google-login">Login with Google</button>
+            <a style="text-decoration: none;" href="/auth/google"><button type="button" class="btn google-login">Login with Google</button></a>
         </form>
         <p class="footer-text">
             Not registered? <a href="/signup">Create an account</a>
         </p>
     </div>
+
+    <script>
+        function validateForm() {
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            var errorDiv = document.getElementById('err-div');
+
+            if (email === '' || password === '') {
+                errorDiv.style.display = 'block';
+                errorDiv.innerText = 'All fields are required.';
+                return false;
+            }
+
+            var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            if (!emailPattern.test(email)) {
+                errorDiv.style.display = 'block';
+                errorDiv.innerText = 'Please enter a valid email address.';
+                return false;
+            }
+
+            if (password.length < 6) {
+                errorDiv.style.display = 'block';
+                errorDiv.innerText = 'Password must be at least 6 characters long.';
+                return false;
+            }
+
+            errorDiv.style.display = 'none';
+            return true;
+        }
+    </script>
 </body>
 </html>

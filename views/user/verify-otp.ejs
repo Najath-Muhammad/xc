@@ -89,38 +89,51 @@
     <script>
         let timerElement = document.getElementById('timer');
         let resendButton = document.getElementById('resend-btn');
-        let timer = 30;
-        
+        let timer = 3;
+    
         function startTimer() {
             resendButton.disabled = true;
             let interval = setInterval(() => {
-                timer--;
-                timerElement.textContent = `Resend OTP in ${timer} seconds`;
-
-                if (timer === 0) {
+                if (timer > 0) {
+                    timer--;
+                    timerElement.textContent = `Resend OTP in ${timer} seconds`;
+                } else {
                     clearInterval(interval);
                     timerElement.textContent = "You can resend the OTP now.";
                     resendButton.disabled = false;
                 }
             }, 1000);
         }
-
+    
         resendButton.addEventListener('click', () => {
-            Swal.fire({
-                icon: 'success',
-                title: 'OTP Resent',
-                text: 'A new OTP has been sent to your registered number.',
+            $.ajax({
+                type: "POST",
+                url: "/resend-otp", // Endpoint to resend OTP
+                success: function(response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'OTP Resent',
+                        text: 'A new OTP has been sent to your registered number.',
+                    });
+                    timer = 15;
+                    startTimer();
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong. Please try again later.'
+                    });
+                }
             });
-            timer = 30;
-            startTimer();
         });
-
+    
         // Initialize timer
         startTimer();
-
+    
         // Handle OTP input focus navigation
         const otpInputs = document.querySelectorAll('.otp-input');
-
+    
         otpInputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
                 if (e.target.value.length === 1) {
@@ -129,25 +142,25 @@
                     }
                 }
             });
-
+    
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !e.target.value && index > 0) {
                     otpInputs[index - 1].focus();
                 }
             });
         });
-
+    
         function validateOTP() {
             let otpInput = "";
             const otpInputs = document.querySelectorAll('.otp-input');
             otpInputs.forEach(input => {
-                otpInput += input.value;  // Concatenate the values of each input
+                otpInput += input.value;  
             });
-
+    
             // Validate the OTP using AJAX
             $.ajax({
                 type: "POST",
-                url: "/verify-otp",  // Ensure the URL matches your route for OTP verification
+                url: "/verify-otp", 
                 data: { otp: otpInput },
                 success: function(response) {
                     if (response.success) {
@@ -175,7 +188,7 @@
                     });
                 }
             });
-
+    
             return false;  // Prevent form submission
         }
     </script>

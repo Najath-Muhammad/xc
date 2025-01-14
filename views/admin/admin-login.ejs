@@ -81,22 +81,68 @@
         .admin-container .footer a:hover {
             text-decoration: underline;
         }
+
+        #err {
+            color: red;
+        }
     </style>
 </head>
 <body>
     <div class="admin-container">
         <h1>Admin Login</h1>
-        <form action="/admin/login" method="post">
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Password" required>
+        <form name="adminLoginForm" id="adminLoginForm" action="/admin/login" method="post" onsubmit="validateAndSubmit(event)">
+            <input type="email" name="email" placeholder="Email">
+            <input type="password" name="password" placeholder="Password">
             <% if (message) { %>
                 <p style="color: red;"><%= message %></p>
             <% } %>
+            <p id="err"></p>
             <button type="submit">Login</button>
         </form>
         <div class="footer">
             Forgot your password? <a href="#">Reset it here</a>
         </div>
     </div>
+
+    <script>
+        function validateAndSubmit(event) {
+            event.preventDefault();
+            if (validateForm()) {
+                document.getElementById("adminLoginForm").submit();
+            }
+        }
+
+        function validateForm() {
+            let err = document.getElementById('err');
+            var email = document.forms["adminLoginForm"]["email"].value;
+            var password = document.forms["adminLoginForm"]["password"].value;
+            var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            err.innerHTML = ""; 
+
+            if (email === "" && password === "") {
+                err.innerHTML = "Please fill in both fields";
+                return false;
+            }
+
+            if (email === "") {
+                err.innerHTML = "Email must be filled out";
+                return false;
+            } else if (!emailPattern.test(email)) {
+                err.innerHTML = "Please enter a valid email address";
+                return false;
+            }
+
+            if (password === "") {
+                err.innerHTML = "Password must be filled out";
+                return false;
+            } else if (password.length < 8) {
+                err.innerHTML = "Password must be at least 8 characters long";
+                return false;
+            }
+
+            return true; 
+        }
+    </script>
 </body>
 </html>
