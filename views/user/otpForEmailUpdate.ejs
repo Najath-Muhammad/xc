@@ -1,0 +1,193 @@
+<%- include('../../views/partials/user/header') %>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background-color: #f4f4f9;
+    }
+
+    .wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-grow: 1;
+        padding: 20px;
+    }
+
+    .otp-container {
+        text-align: center;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 300px;
+    }
+
+    .otp-container h2 {
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+    .otp-input {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .otp-input:focus {
+        border-color: #007bff;
+    }
+
+    .send-btn {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        font-size: 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .send-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .message {
+        margin-top: 15px;
+        font-size: 0.9rem;
+        color: green;
+    }
+
+    .timer {
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #666;
+        text-align: center;
+    }
+
+    .resend-container {
+        margin-top: 15px;
+        font-size: 0.9rem;
+    }
+
+    .resend-link {
+        color: #007bff;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .resend-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="wrapper">
+    <div class="content">
+        <div class="otp-container">
+            <h2>Enter OTP</h2>
+            <form action="/emailUpdateOtp" method="post">
+                <input 
+                    type="text" 
+                    id="otp" 
+                    name="enteredOtp" 
+                    class="otp-input" 
+                    maxlength="6" 
+                    placeholder="Enter 6-digit OTP"
+                >
+                <button type="submit" class="send-btn">Submit OTP</button>
+                
+                <p class="message" id="message"></p>
+                <div id="timer" class="timer"></div>
+            </form>
+            
+            <div class="resend-container">
+                <p>
+                    Didn't receive the OTP? 
+                    <a 
+                        href="#" 
+                        id="resendOtp" 
+                        class="resend-link" 
+                        style="display:none;"
+                    >
+                        Resend OTP
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const timerElement = document.getElementById('timer');
+    const resendLink = document.getElementById('resendOtp');
+    let timeLeft = 30; // 3 minutes
+
+    function startTimer() {
+        const timerInterval = setInterval(function() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            
+            timerElement.textContent = `OTP expires in ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerElement.textContent = 'OTP Expired';
+                resendLink.style.display = 'inline';
+            }
+            
+            timeLeft--;
+        }, 1000);
+    }
+
+    document.getElementById('resendOtp').addEventListener('click', async function(e) {
+        e.preventDefault();
+        try {
+            const response = await fetch('/resendOtp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                timeLeft = 180;
+                startTimer();
+                
+                resendLink.style.display = 'none';
+                
+                document.getElementById('message').textContent = 'OTP resent successfully!';
+                document.getElementById('message').style.color = 'green';
+            } else {
+                document.getElementById('message').textContent = result.message || 'Failed to resend OTP';
+                document.getElementById('message').style.color = 'red';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('message').textContent = 'An error occurred while resending OTP';
+            document.getElementById('message').style.color = 'red';
+        }
+    });
+
+    startTimer();
+});
+</script>
+
+<%- include('../../views/partials/user/footer') %>

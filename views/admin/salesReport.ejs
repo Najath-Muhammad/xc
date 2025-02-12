@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4facfe;
+            --primary-hover: #00f2fe;
+            --dark: #333;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(to bottom, #4facfe, #00f2fe);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 15px 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .metrics-card {
+            background: linear-gradient(45deg, var(--primary), var(--primary-hover));
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        .report-type-btn {
+            padding: 8px 16px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .report-type-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .export-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+
+        .status-completed {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-pending {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .status-cancelled {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="/admin/dashboard">Dashboard</a></li>
+            <li><a href="/admin/users">User</a></li>
+            <li><a href="/admin/orders">Order</a></li>
+            <li><a href="/admin/addProducts">Add Products</a></li>
+            <li><a href="/admin/products">Products</a></li>
+            <li><a href="/admin/brands">Brands</a></li>
+            <li><a href="/admin/category">Category</a></li>
+            <li><a href="/admin/offers">Offers</a></li>
+            <li><a href="/admin/coupons" class="active">Coupons</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <button class="logout-btn" onclick="window.location.href='/admin/logout';"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="page-title">Sales Report</h3>
+            <div class="btn-group">
+                <button onclick="exportReport('pdf')" class="btn btn-danger export-btn me-2">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </button>
+                <button onclick="exportReport('excel')" class="btn btn-success export-btn">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+            </div>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="metrics-card">
+                    <div class="metric-value">₹<%= reportData.totalSales.toLocaleString() %></div>
+                    <div class="metric-label">Total Sales</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metrics-card">
+                    <div class="metric-value"><%= reportData.totalOrders %></div>
+                    <div class="metric-label">Total Orders</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metrics-card">
+                    <div class="metric-value">₹<%= reportData.totalDiscount.toLocaleString() %></div>
+                    <div class="metric-label">Total Discount</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metrics-card">
+                    <div class="metric-value">₹<%= (reportData.totalSales - reportData.totalDiscount).toLocaleString() %></div>
+                    <div class="metric-label">Net Revenue</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section mb-4">
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="btn-group w-100" role="group">
+                        <button type="button" class="btn report-type-btn <%= reportType === 'daily' ? 'active' : '' %>" 
+                                onclick="changeReportType('daily')">Daily</button>
+                        <button type="button" class="btn report-type-btn <%= reportType === 'weekly' ? 'active' : '' %>"
+                                onclick="changeReportType('weekly')">Weekly</button>
+                        <button type="button" class="btn report-type-btn <%= reportType === 'monthly' ? 'active' : '' %>"
+                                onclick="changeReportType('monthly')">Monthly</button>
+                        <button type="button" class="btn report-type-btn <%= reportType === 'custom' ? 'active' : '' %>"
+                                onclick="toggleCustomDate()">Custom Date</button>
+                    </div>
+                </div>
+                <div class="col-12 custom-date-inputs" style="display: <%= reportType === 'custom' ? 'block' : 'none' %>">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <input type="date" class="form-control" id="startDate" value="<%= startDate?.toISOString().split('T')[0] %>">
+                        </div>
+                        <div class="col-md-5">
+                            <input type="date" class="form-control" id="endDate" value="<%= endDate?.toISOString().split('T')[0] %>">
+                        </div>
+                        <div class="col-md-2">
+                            <button onclick="applyCustomDate()" class="btn btn-primary w-100">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Data Table -->
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Discount</th>
+                            <th>Final Amount</th>
+                            <th>Payment Method</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% reportData.orders.forEach(order => { %>
+                        <tr>
+                            <td><%= order.orderId %></a></td>
+                            <td><%= new Date(order.date).toLocaleDateString() %></td>
+                            <td>₹<%= order.amount.toLocaleString() %></td>
+                            <td>₹<%= order.discount.toLocaleString() %></td>
+                            <td>₹<%= (order.amount - order.discount).toLocaleString() %></td>
+                            <td><%= order.paymentMethod %></td>
+                            <td>
+                                <span class="status-badge status-<%= order.status.toLowerCase() %>">
+                                    <%= order.status %>
+                                </span>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-active">
+                            <td colspan="2"><strong>Total</strong></td>
+                            <td><strong>₹<%= reportData.totalSales.toLocaleString() %></strong></td>
+                            <td><strong>₹<%= reportData.totalDiscount.toLocaleString() %></strong></td>
+                            <td><strong>₹<%= (reportData.totalSales - reportData.totalDiscount).toLocaleString() %></strong></td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function changeReportType(type) {
+            window.location.href = `/admin/salesReport?reportType=${type}`;
+        }
+
+        function toggleCustomDate() {
+            document.querySelector('.custom-date-inputs').style.display = 'block';
+        }
+
+        function applyCustomDate() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            if (startDate && endDate) {
+                window.location.href = `/admin/salesReport?reportType=custom&startDate=${startDate}&endDate=${endDate}`;
+            } else {
+                Swal.fire('Error', 'Please select both start and end dates', 'error');
+            }
+        }
+
+        async function exportReport(type) {
+            const reportType = '<%= reportType %>';
+            const startDate = document.getElementById('startDate')?.value;
+            const endDate = document.getElementById('endDate')?.value;
+            
+            let url = `/admin/sales-report/export?type=${type}&reportType=${reportType}`;
+            if (reportType === 'custom' && startDate && endDate) {
+                url += `&startDate=${startDate}&endDate=${endDate}`;
+            }
+            
+            try {
+                window.location.href = url;
+            } catch (error) {
+                console.error('Export error:', error);
+                Swal.fire('Error', 'Failed to export report', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

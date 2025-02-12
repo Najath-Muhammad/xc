@@ -19,7 +19,7 @@
       .product__details__pic__item {
           text-align: center;
           margin: auto;
-          max-width: 500px; /* Adjust size */
+          max-width: 500px;
       }
       
       .product__details__pic__item img {
@@ -57,6 +57,13 @@
           color: red;
           font-size: large;
           font-weight: 600;
+      }
+      .offerp{
+        color: green;
+        font-weight: bold;
+      }
+      .noOfferp{
+        font-weight: 100;
       }
       
           </style>
@@ -132,24 +139,19 @@
                                 <span class="star" data-value="5">&#9733;</span>
                             </div>
                             <p id="rating-value"></p>
-                            <h3> <%=product.salePrice%>$<span><%=product.regularPrice%>$</span></h3>
-                            <p>
+                            <h3> <%=product.salePrice%>₹<span><%=product.regularPrice%>₹</span></h3>
                                 <% if(!totalOffer) {%>
-                                    No Offers
+                                   <p class="noOfferp">No Offers</p> 
                                 <%}else{%>    
-                                    <%=totalOffer%>% Offer
+                                    <p class="offerp"><%=totalOffer%>% Offer</p>
                                 <%}%>    
-                            </p>
+                            
                             <div class="stock">
-                                <% if(product.quantity === 0){ %>
+                                <% if(product.quantity <= 5){ %>
                                  
-                                    <p>Out Of Stock</p>   
+                                    <p>Only Few Stocks Are Left</p>   
 
-                                 <%} else if (product.quantity<4){%>  
-                                 <p> Only Few Stocks Are Left</p>    
-                                 <%} else {%>
-                                <p>Available Stock: <%=product.quantity%></p>
-                                <%}%>
+                                 <%} %>
                             </div>
                             <div class="product__details__option">
                                 <!-- <div class="product__details__option__size">
@@ -189,24 +191,30 @@
                             <div class="product__details__cart__option">
                                 <div class="quantity">
                                     <div class="pro-qty">
-                                        <input type="text" value="1">
+                                        <input id="product-quantity" type="number" value="1" min="1" max="<%= product.quantity %>">
                                     </div>
                                 </div>
-                                <%if(product.quantity<=0){%>
-                                 <p class="unavailable">
-                                    Currently Unavailable
-                                 </p>   
-                                 <%}else{%>   
-                                <a href="#" class="primary-btn">add to cart</a>
-                                <%}%>
+                                <p id="error-message" class="error-message" style="color: red; display: none;">Quantity Exceeded The Limit.</p>
+                                <% if (quantity <= 0) { %>
+                                    <p class="unavailable">Currently Unavailable</p>
+                                <% } else { %>
+                                    <button class="primary-btn" id="add-to-cart-btn">
+                                        Add to Cart
+                                    </button>
+                                <% } %>
+                                <div id="product-data" data-quantity="<%= product.quantity %>"></div>
                             </div>
+                            <%if(user.wishlist.includes(product._id)){%>
+                                <p style="font-weight: 800; font-size: 20px;">Already Added to Wishlist</p>
+                            <%}else{%>   
                             <div class="product__details__btns__option">
-                                <button class="primary-btn">
-                                    <a href="#" style="color: white;"><i class="fa fa-heart"></i> add to wishlist</a>
+                                <button class="primary-btn" onclick="addToWishlist('<%=product._id%>')">
+                                    <a href="" style="color: white;"><i class="fa fa-heart"></i> add to wishlist</a>
                                 </button>
                                 
                                 <!-- <a href="#"><i class="fa fa-exchange"></i> Add To Compare</a> -->
                             </div>
+                            <%}%>
                             <!-- <div class="product__details__last__option">
                                 <h5><span>Guaranteed Safe Checkout</span></h5>
                                 <img src="img/shop-details/details-payment.png" alt="">
@@ -258,11 +266,11 @@
                                                 accompanied with specific software to operate the unit and must feature
                                             a touchscreen and touchpad.</p>
                                             <p>As is the case with any new technology product, the cost of a Pocket PC
-                                                was substantial during it’s early release. For approximately $700.00,
+                                                was substantial during it’s early release. For approximately ₹700.00,
                                                 consumers could purchase one of top-of-the-line Pocket PCs in 2003.
                                                 These days, customers are finding that prices have become much more
                                                 reasonable now that the newness is wearing off. For approximately
-                                            $350.00, a new Pocket PC can now be purchased.</p>
+                                            ₹350.00, a new Pocket PC can now be purchased.</p>
                                         </div>
                                         <div class="product__details__tab__content__item">
                                             <h5>Material used</h5>
@@ -292,11 +300,11 @@
                                                 accompanied with specific software to operate the unit and must feature
                                             a touchscreen and touchpad.</p>
                                             <p>As is the case with any new technology product, the cost of a Pocket PC
-                                                was substantial during it’s early release. For approximately $700.00,
+                                                was substantial during it’s early release. For approximately ₹700.00,
                                                 consumers could purchase one of top-of-the-line Pocket PCs in 2003.
                                                 These days, customers are finding that prices have become much more
                                                 reasonable now that the newness is wearing off. For approximately
-                                            $350.00, a new Pocket PC can now be purchased.</p>
+                                            ₹350.00, a new Pocket PC can now be purchased.</p>
                                         </div>
                                         <div class="product__details__tab__content__item">
                                             <h5>Material used</h5>
@@ -349,7 +357,7 @@
                                 <i class="fa fa-star-o"></i>
                                 <i class="fa fa-star-o"></i>
                             </div>
-                            <h5>$<%=products[i].salePrice%></h5>
+                            <h5>₹<%=products[i].salePrice%></h5>
                             <!-- <div class="product__color__select">
                                 <label for="pc-1">
                                     <input type="radio" id="pc-1">
@@ -460,27 +468,67 @@
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
     <script src="js/jquery.elevatezoom.js"></script>
+    <!-- Include SweetAlert2 library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        $(document).ready(function() {
-            $('#productZoom1').elevateZoom({
-                zoomType: "lens",
-                lensShape: "round",
-                lensSize: 200
-            });
-            $('#productZoom2').elevateZoom({
-                zoomType: "lens",
-                lensShape: "round",
-                lensSize: 200
-            });
-            $('#productZoom3').elevateZoom({
-                zoomType: "lens",
-                lensShape: "round",
-                lensSize: 200
-            });
-        });
+        document.getElementById('product-quantity').addEventListener('input', function() {
+    var chosenQuantity = parseInt(this.value);
+    var stockQuantity = parseInt(document.getElementById('product-data').getAttribute('data-quantity'));
 
-        // script.js
+    var errorMessage = document.getElementById('error-message');
+    var addToCartButton = document.getElementById('add-to-cart-btn');
+
+    if (chosenQuantity > stockQuantity || chosenQuantity < 1 || chosenQuantity >10) {
+        errorMessage.style.display = 'block';
+        addToCartButton.disabled = true;
+    } else {
+        errorMessage.style.display = 'none';
+        addToCartButton.disabled = false;
+    }
+});
+
+document.getElementById('add-to-cart-btn').addEventListener('click', function(event) {
+    const quantityInput = document.getElementById('product-quantity');
+    const errorMessage = document.getElementById('error-message');
+    const maxQuantity = document.getElementById('product-data').dataset.quantity;
+    const quantity = parseInt(quantityInput.value, 10);
+
+    if (quantity < 1 || quantity > 10 && maxQuantity < quantity) {
+        errorMessage.style.display = 'block';
+        event.preventDefault();
+    } 
+    else {
+        errorMessage.style.display = 'none';
+        addToCart('<%= product._id %>', '<%= product.salePrice %>');
+    }
+});
+
+// Product Zoom Initialization
+$(document).ready(function() {
+    $('#productZoom1').elevateZoom({
+        zoomType: "lens",
+        lensShape: "round",
+        lensSize: 300,
+        cursor: 'pointer',
+        responsive: true
+    });
+    $('#productZoom2').elevateZoom({
+        zoomType: "lens",
+        lensShape: "round",
+        lensSize: 200,
+        cursor: 'pointer',
+        responsive: true
+    });
+    $('#productZoom3').elevateZoom({
+        zoomType: "lens",
+        lensShape: "round",
+        lensSize: 200,
+        cursor: 'pointer',
+        responsive: true
+    });
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     const breadcrumbContainer = document.getElementById('breadcrumb');
     const pathArray = window.location.pathname.split('/').filter(function (path) {
@@ -501,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function () {
             breadcrumbContainer.appendChild(span);
         } else {
             const link = document.createElement('a');
-            link.href = path + ".html"; // Assuming the URL structure ends with .html
+            link.href = path + ".html"; 
             link.textContent = segment.charAt(0).toUpperCase() + segment.slice(1);
             breadcrumbContainer.appendChild(link);
         }
@@ -513,7 +561,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
-// script.js
+
 document.addEventListener('DOMContentLoaded', () => {
     const stars = document.querySelectorAll('.star');
     const ratingValue = document.getElementById('rating-value');
@@ -522,10 +570,8 @@ document.addEventListener('DOMContentLoaded', () => {
         star.addEventListener('click', () => {
             const rating = star.getAttribute('data-value');
 
-            // Remove the selected class from all stars
             stars.forEach(s => s.classList.remove('selected'));
 
-            // Add the selected class to the clicked star and all previous stars
             star.classList.add('selected');
             let previousSibling = star.previousElementSibling;
             while (previousSibling) {
@@ -533,11 +579,110 @@ document.addEventListener('DOMContentLoaded', () => {
                 previousSibling = previousSibling.previousElementSibling;
             }
 
-            // Update the rating value display
             ratingValue.textContent = `Rating: ${rating}`;
         });
     });
 });
+
+async function addToCart(productId, price) {
+    const quantity = document.getElementById('product-quantity').value;
+    
+    try {
+        const response = await fetch('/addToCart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                productId,
+                price,
+                quantity: parseInt(quantity),
+            }),
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            Swal.fire({
+                title: 'Success!',
+                text: data.message,
+                icon: 'success',
+                confirmButtonText: 'Continue Shopping',
+                confirmButtonColor: '#3085d6',
+                showCancelButton: true,
+                cancelButtonText: 'View Cart',
+                cancelButtonColor: '#d33'
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    window.location.href = '/cart';
+                }
+            });
+        } else {
+            Swal.fire({
+                title: 'Error!',
+                text: data.error,
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            title: 'Error!',
+            text: 'Something went wrong. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'Ok'
+        });
+    }
+}
+
+
+async function addToWishlist(productId) {
+    try {
+        const response = await fetch('/addToWishlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId })
+        });
+        console.log('response', response);
+        const data = await response.json();
+        console.log('data', data);
+
+        if (data.status === true) {
+            Swal.fire({
+                title: 'Added to Wishlist!',
+                text: data.message || 'Product added to wishlist successfully',
+                icon: 'success',
+                confirmButtonText: 'Continue Shopping',
+                confirmButtonColor: '#3085d6',
+                showCancelButton: true,
+                cancelButtonText: 'View Wishlist',
+                cancelButtonColor: '#d33'
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    window.location.href = '/wishlist';
+                }
+            });
+            
+        } else {
+            Swal.fire({
+                title: 'Wishlist Update',
+                text: data.message || 'Could not add to wishlist',
+                icon: 'info',
+                confirmButtonText: 'Ok'
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            title: 'Error!',
+            text: 'Something went wrong. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'Ok'
+        });
+        console.error('Wishlist error:', error);
+    }
+}
     </script>
 </body>
 

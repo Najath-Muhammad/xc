@@ -91,8 +91,8 @@
     <div class="admin-container">
         <h1>Admin Login</h1>
         <form name="adminLoginForm" id="adminLoginForm" action="/admin/login" method="post" onsubmit="validateAndSubmit(event)">
-            <input type="email" name="email" placeholder="Email">
-            <input type="password" name="password" placeholder="Password">
+            <input type="email" name="email" placeholder="Email" value="admin@gmail.com">
+            <input type="password" name="password" placeholder="Password" value="admin123">
             <% if (message) { %>
                 <p style="color: red;"><%= message %></p>
             <% } %>

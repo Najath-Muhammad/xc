@@ -1,0 +1,315 @@
+<%- include('../../views/partials/user/header') %>
+
+<style>
+.order-success {
+  text-align: center;
+  padding: 4rem 0;
+  background: #f8f9fa;
+  margin-bottom: 3rem;
+}
+
+.success-icon {
+  width: 120px;
+  height: 120px;
+  background: #28a745;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.25);
+}
+
+.success-icon svg {
+  width: 60px;
+  height: 60px;
+  fill: white;
+}
+
+.order-success h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #212529;
+  font-weight: 600;
+}
+
+.order-success .text-muted {
+  font-size: 1.2rem;
+  color: #6c757d;
+}
+
+.order-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.order-card h5 {
+  font-size: 1.4rem;
+  color: #212529;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f8f9fa;
+  font-weight: 600;
+}
+
+.status-timeline {
+  display: flex;
+  justify-content: space-between;
+  margin: 2.5rem 0;
+  position: relative;
+  padding: 0 1.5rem;
+}
+
+.status-timeline::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 60px;
+  right: 60px;
+  height: 3px;
+  background: #e9ecef;
+  z-index: 1;
+}
+
+.status-step {
+  position: relative;
+  z-index: 2;
+  background: white;
+  padding: 0 15px;
+  text-align: center;
+  flex: 1;
+}
+
+.step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  margin: 0 auto 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.status-step.active .step-icon {
+  background: #28a745;
+  border-color: #28a745;
+  color: white;
+  box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+}
+
+.step-label {
+  font-size: 1rem;
+  color: #6c757d;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.active .step-label {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.billing-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  padding: 0.5rem;
+}
+
+.billing-info p {
+  margin-bottom: 1rem;
+  color: #495057;
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+.billing-info strong {
+  color: #212529;
+  margin-right: 0.75rem;
+}
+
+.order-summary {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 1.75rem;
+}
+
+.order-summary table {
+  margin-bottom: 0;
+  width: 100%;
+}
+
+.order-summary td {
+  padding: 1rem 0;
+  color: #495057;
+  font-size: 1.05rem;
+}
+
+.order-summary .text-end {
+  font-weight: 500;
+  text-align: right;
+}
+
+.order-summary tr:last-child td {
+  color: #212529;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.btn-continue {
+  background: #28a745;
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 10px rgba(40, 167, 69, 0.2);
+  margin-top: 2rem;
+}
+
+.btn-continue:hover {
+  background: #218838;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+@media (max-width: 768px) {
+  .billing-info {
+    grid-template-columns: 1fr;
+  }
+
+  .status-timeline {
+    padding: 0;
+  }
+
+  .status-step {
+    padding: 0 8px;
+  }
+
+  .step-label {
+    font-size: 0.9rem;
+  }
+
+  .order-card {
+    padding: 1.5rem;
+  }
+
+  .btn-continue {
+    width: 100%;
+    text-align: center;
+  }
+}
+</style>
+
+<!-- Order Success Section -->
+<div class="order-success">
+  <div class="success-icon">
+    <svg viewBox="0 0 24 24">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+    </svg>
+  </div>
+  <h2>Thank You for Your Order!</h2>
+  <p class="text-muted">Your order has been placed successfully</p>
+</div>
+
+<!-- Order Details Section -->
+<section class="spad">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8">
+        <!-- Status Timeline -->
+        <div class="order-card">
+          <h5>Order Status</h5>
+          <div class="status-timeline">
+            <div class="status-step active">
+              <div class="step-icon">1</div>
+              <div class="step-label">Order Placed</div>
+            </div>
+            <div class="status-step <%= status === 'Processing' || status === 'Shipped' || status === 'Delivered' ? 'active' : '' %>">
+              <div class="step-icon">2</div>
+              <div class="step-label">Processing</div>
+            </div>
+            <div class="status-step <%= status === 'Shipped' || status === 'Delivered' ? 'active' : '' %>">
+              <div class="step-icon">3</div>
+              <div class="step-label">Shipped</div>
+            </div>
+            <div class="status-step <%= status === 'Delivered' ? 'active' : '' %>">
+              <div class="step-icon">4</div>
+              <div class="step-label">Delivered</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Billing Details -->
+        <div class="order-card">
+          <h5>Billing Details</h5>
+          <div class="billing-info">
+            <p><strong>Name:</strong> <%=selectedAddress.address[0].name%></p>
+            <p><strong>Address Type:</strong> <%= selectedAddress.address[0].addressType %></p>
+            <p><strong>Street:</strong> <%= selectedAddress.address[0].streetAddress %></p>
+            <p><strong>City:</strong> <%= selectedAddress.address[0].city %></p>
+            <p><strong>Landmark:</strong> <%= selectedAddress.address[0].landMark %></p>
+            <p><strong>State:</strong> <%= selectedAddress.address[0].state %></p>
+            <p><strong>Pincode:</strong> <%= selectedAddress.address[0].pincode %></p>
+            <p><strong>Phone:</strong> <%= selectedAddress.address[0].phone %></p>
+            <p><strong>Alternative Phone:</strong> <%= selectedAddress.address[0].altPhone %></p>
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="order-card">
+          <h5>Payment Information</h5>
+          <p><strong>Payment Method:</strong> <%= paymentMethod %></p>
+          <p><strong>Payment Status:</strong> <%= paymentStatus %></p>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <!-- Order Summary -->
+        <div class="order-card">
+          <h5>Order Summary</h5>
+          <div class="order-summary">
+            <table class="table table-borderless">
+              <tbody>
+                <% orderedItems.forEach(item => { %>
+                  <tr>
+                    <td><%= item.product.productName %></td>
+                    <td>x<%= item.quantity %></td>
+                    <td class="text-end">₹<%= (item.price * item.quantity).toFixed(2) %></td>
+                  </tr>
+                <% }); %>
+                <tr>
+                  <td colspan="2" class="border-top pt-3"><strong>Subtotal</strong></td>
+                  <td class="text-end border-top pt-3"><strong>₹<%= finalAmount.toFixed(2) %></strong></td>
+                </tr>
+                <tr>
+                  <td colspan="2"><strong>Total</strong></td>
+                  <td class="text-end"><strong>₹<%= finalAmount.toFixed(2) %></strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="text-center">
+            <a href="/" class="btn-continue">Continue Shopping</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../../views/partials/user/footer') %>

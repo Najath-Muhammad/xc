@@ -89,8 +89,8 @@
     <script>
         let timerElement = document.getElementById('timer');
         let resendButton = document.getElementById('resend-btn');
-        let timer = 3;
-    
+        let timer = 30;
+
         function startTimer() {
             resendButton.disabled = true;
             let interval = setInterval(() => {
@@ -104,7 +104,7 @@
                 }
             }, 1000);
         }
-    
+
         resendButton.addEventListener('click', () => {
             $.ajax({
                 type: "POST",
@@ -115,7 +115,7 @@
                         title: 'OTP Resent',
                         text: 'A new OTP has been sent to your registered number.',
                     });
-                    timer = 15;
+                    timer = 30;
                     startTimer();
                 },
                 error: function() {
@@ -127,13 +127,13 @@
                 }
             });
         });
-    
+
         // Initialize timer
         startTimer();
-    
+
         // Handle OTP input focus navigation
         const otpInputs = document.querySelectorAll('.otp-input');
-    
+
         otpInputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
                 if (e.target.value.length === 1) {
@@ -142,56 +142,88 @@
                     }
                 }
             });
-    
+
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !e.target.value && index > 0) {
                     otpInputs[index - 1].focus();
                 }
             });
         });
-    
+
         function validateOTP() {
-            let otpInput = "";
-            const otpInputs = document.querySelectorAll('.otp-input');
-            otpInputs.forEach(input => {
-                otpInput += input.value;  
+    let otpInput = "";
+    const otpInputs = document.querySelectorAll('.otp-input');
+    otpInputs.forEach(input => {
+        otpInput += input.value;  
+    });
+
+    console.log("OTP Input: ", otpInput); // Debug log
+
+    fetch('/verify-otp', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ otp: otpInput }),
+        credentials: 'include' // This is important for sending cookies/session
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Full Response: ", data); // Debug log
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'OTP Verified',
+                showConfirmButton: false,
+                timer: 1500,
+            }).then(() => {
+                window.location.href = data.redirectUrl;
             });
-    
-            // Validate the OTP using AJAX
-            $.ajax({
-                type: "POST",
-                url: "/verify-otp", 
-                data: { otp: otpInput },
-                success: function(response) {
-                    if (response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'OTP Verified',
-                            showConfirmButton: false,
-                            timer: 1500,
-                        }).then(() => {
-                            window.location.href = response.redirectUrl;
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Invalid OTP',
-                            text: 'Please enter the correct OTP'
-                        });
-                    }
-                },
-                error: function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Something went wrong. Please try again later.'
-                    });
-                }
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid OTP',
+                text: data.message || 'Please enter the correct OTP'
             });
-    
-            return false;  // Prevent form submission
         }
+    })
+    .catch(error => {
+        console.error("Error Details:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong. Please try again later.'
+        });
+    });
+
+    return false;
+}
+
+
+document.getElementById('resend-btn').addEventListener('click', () => {
+    fetch('/resend-otp', {
+        method: 'POST',
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        Swal.fire({
+            icon: 'success',
+            title: 'OTP Resent',
+            text: 'A new OTP has been sent to your registered number.',
+        });
+        timer = 30;
+        startTimer();
+    })
+    .catch(error => {
+        console.error("Error resending OTP:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong. Please try again later.'
+        });
+    });
+});
     </script>
 </body>
 </html>
-

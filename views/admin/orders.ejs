@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(to bottom, #4facfe, #00f2fe);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 15px 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .main-content {
+            margin-left: 270px;
+            padding: 20px;
+        }
+
+
+        .main-container {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+
+        .status-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: capitalize;
+            display: inline-block;
+        }
+
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-processing { background-color: #cce5ff; color: #004085; }
+        .status-shipped { background-color: #d4edda; color: #155724; }
+        .status-Delivered { background-color: #c3e6cb; color: #1e7e34; }
+        .status-Cancelled { background-color: #f8d7da; color: #721c24; }
+        .status-Return-Request { background-color: #e2e3e5; color: #383d41; }
+        .status-Returned { background-color: #d6d8d9; color: #1b1e21; }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .action-dropdown .dropdown-toggle {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background-color: white;
+            border: 1px solid #ddd;
+            min-width: 140px;
+            text-align: left;
+        }
+
+        .order-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filters-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .pagination {
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h3 class="mb-4">Admin Panel</h3>
+        <ul>
+            <li><a href="/admin/dashboard">Dashboard</a></li>
+            <li><a href="/admin/users">User</a></li>
+            <li><a href="/admin/orders">Order</a></li>
+            <li><a href="/admin/addProducts">Add Products</a></li>
+            <li><a href="/admin/products">Products</a></li>
+            <li><a href="/admin/brands">Brands</a></li>
+            <li><a href="/admin/category">Category</a></li>
+            <li><a href="/admin/offers">Offers</a></li>
+            <li><a href="/admin/coupons">Coupons</a></li>
+        </ul>
+    </div>
+
+    <div class="main-container">
+        <h2 class="mb-4">Order Management</h2>
+        
+        <div class="filters-card">
+            <div class="row">
+                <div class="col-md-9">
+                    <select class="form-select" id="statusFilter">
+                        <option value="">All Orders</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                        <option value="Return Request">Return Request</option>
+                        <option value="Returned">Returned</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button onclick="applyFilters()" class="btn btn-primary w-100">
+                        Apply Filter
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Return Details</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orders.forEach(order => { %>
+                            <tr>
+                                <td>
+                                    <a href="/admin/order/<%= order.orderId %>" class="text-decoration-none text-dark">
+                                        <%= order.orderId %>
+                                    </a>
+                                </td>
+                                <td>
+                                    <% if (order.userId) { %>
+                                        <%= order.userId.name %><br>
+                                        <small class="text-muted"><%= order.userId.email %></small>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <div class="order-items">
+                                        <% order.orderedItems.forEach(item => { %>
+                                            <div>
+                                                <%= item.product.name %> × <%= item.quantity %>
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                </td>
+                                <td>₹<%= order.finalAmount.toLocaleString() %></td>
+                                <td>
+                                    <span class="status-badge status-<%= order.status %>">
+                                        <%= order.status %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <% if (order.returnReason) { %>
+                                        <%= order.returnReason %>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (order.status !== 'Cancelled' && order.status !== 'Returned' && order.status !== 'Completed') { %>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" 
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                Update Status
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <% const currentStatus = order.status; %>
+                                                
+                                                <% if (currentStatus === 'Pending') { %>
+                                                    <li><button class="dropdown-item" onclick="updateOrderStatus('<%= order.orderId %>', 'Processing')">Process Order</button></li>
+                                                    <li><button class="dropdown-item text-danger" onclick="updateOrderStatus('<%= order.orderId %>', 'Cancelled')">Cancel Order</button></li>
+                                                <% } %>
+                                                
+                                                <% if (currentStatus === 'Processing') { %>
+                                                    <li><button class="dropdown-item" onclick="updateOrderStatus('<%= order.orderId %>', 'Shipped')">Mark as Shipped</button></li>
+                                                    <li><button class="dropdown-item text-danger" onclick="updateOrderStatus('<%= order.orderId %>', 'Cancelled')">Cancel Order</button></li>
+                                                <% } %>
+                                                
+                                                <% if (currentStatus === 'Shipped') { %>
+                                                    <li><button class="dropdown-item" onclick="updateOrderStatus('<%= order.orderId %>', 'Delivered')">Mark as Delivered</button></li>
+                                                <% } %>
+                                                
+                                                <% if (currentStatus === 'Delivered') { %>
+                                                    <li><button class="dropdown-item" onclick="updateOrderStatus('<%= order.orderId %>', 'Return Request')">Request Return</button></li>
+                                                <% } %>
+                                                
+                                                <% if (currentStatus === 'Return Request') { %>
+                                                    <li><button class="dropdown-item" onclick="updateOrderStatus('<%= order.orderId %>', 'Return Accepted')">Accept Return</button></li>
+                                                    <li><button class="dropdown-item text-danger" onclick="updateOrderStatus('<%= order.orderId %>', 'Return Cancelled')">Cancel Return</button></li>
+                                                <% } %>
+                                                <% if (currentStatus === "Return Accepted") { %>
+                                                    <li><button class="dropdown-item" onclick="updateOrderStatus('<%= order.orderId %>', 'Completed')">Complete Return</button></li>
+                                                <% } %>
+                                            </ul>
+                                        </div>
+                                    <% } %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Controls -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <% if (currentPage > 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="/admin/orders?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        <% } %>
+
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                <a class="page-link" href="/admin/orders?page=<%= i %>"><%= i %></a>
+                            </li>
+                        <% } %>
+
+                        <% if (currentPage < totalPages) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="/admin/orders?page=<%= currentPage + 1 %>" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        <% } %>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Return Request Modal -->
+    <div class="modal fade" id="returnRequestModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Return Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="returnRequestForm">
+                        <input type="hidden" id="returnOrderId">
+                        <div class="mb-3">
+                            <label for="returnReason" class="form-label">Return Reason</label>
+                            <textarea class="form-control" id="returnReason" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="submitReturnRequest()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function updateOrderStatus(orderId, status) {
+            try {
+                const response = await fetch('/admin/order/update-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId, status })
+                });
+
+                const data = await response.json();
+                
+                if (data.status) {
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Invalid status transition');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating the order status');
+            }
+        }
+
+        function showReturnRequestModal(orderId) {
+            document.getElementById('returnOrderId').value = orderId;
+            new bootstrap.Modal(document.getElementById('returnRequestModal')).show();
+        }
+
+        async function submitReturnRequest() {
+            const orderId = document.getElementById('returnOrderId').value;
+            const returnReason = document.getElementById('returnReason').value;
+
+            if (!returnReason.trim()) {
+                alert('Please provide a return reason');
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/order/update-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderId,
+                        status: 'Return Request',
+                        returnReason
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.status) {
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Failed to submit return request');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while submitting return request');
+            }
+        }
+
+        function applyFilters() {
+            const status = document.getElementById('statusFilter').value;
+            const currentPage = <%= currentPage %>; // Pass the current page from the server
+            window.location.href = `/admin/orders?page=${currentPage}${status ? `&status=${status}` : ''}`;
+        }
+    </script>
+</body>
+</html>

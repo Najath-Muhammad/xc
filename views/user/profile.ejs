@@ -1,355 +1,1056 @@
 <%-include('../../views/partials/user/header')%>
 <style>
-    .product-cart-wrap {
-        border: 1px solid #eaeaea;
-        transition: all 0.3s ease-in-out;
-        background-color: #fff;
-    }
-    
-    .product-cart-wrap:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    .btn-primary {
-        background-color: #ff6f61;
-        border: none;
-        transition: background-color 0.3s;
-    }
-    
-    .btn-primary:hover {
-        background-color: #e5574c;
-    }
+/* Color Variables */
+:root {
+    --primary-white: #ffffff;
+    --primary-black: #000000;
+    --primary-orange: #ff6b35;
+    --light-orange: #fff8f6;
+    --border-light: #e0e0e0;
+    --text-dark: #333333;
+    --text-light: #666666;
+}
 
-    /* Profile specific styles */
-    .profile-section {
-        padding: 40px 0;
-        background-color: #f8f9fa;
-    }
+/* Global Profile Styles */
+.profile-section {
+    padding: 40px 0;
+    background-color: var(--primary-white);
+}
 
-    .profile-tabs {
-        margin-bottom: 30px;
-        border-bottom: 2px solid #eaeaea;
-    }
+/* Tabs Styling */
+.profile-tabs {
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--primary-orange);
+}
 
-    .profile-tabs .nav-link {
-        color: #333;
-        font-weight: 500;
-        padding: 15px 25px;
-        border: none;
-        border-bottom: 2px solid transparent;
-        margin-bottom: -2px;
-    }
+.profile-tabs .nav-link {
+    color: var(--text-dark);
+    font-weight: 500;
+    padding: 15px 25px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.3s ease;
+}
 
-    .profile-tabs .nav-link.active {
-        color: #ff6f61;
-        border-bottom: 2px solid #ff6f61;
-    }
+.profile-tabs .nav-link:hover {
+    color: var(--primary-orange);
+}
 
-    .profile-card {
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        padding: 20px;
-        margin-bottom: 20px;
-    }
+.profile-tabs .nav-link.active {
+    color: var(--primary-orange);
+    border-bottom: 2px solid var(--primary-orange);
+    font-weight: 600;
+}
 
-    .address-card {
-        border: 1px solid #eaeaea;
-        padding: 15px;
-        margin-bottom: 15px;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-    }
+/* Cards Styling */
+.profile-card {
+    background: var(--primary-white);
+    border-radius: 12px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    padding: 30px;
+    margin-bottom: 25px;
+    border: 1px solid var(--border-light);
+}
 
-    .address-card:hover {
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
+/* Form Controls */
+.form-control {
+    border: 1px solid var(--border-light);
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background-color: var(--primary-white);
+}
 
-    .order-card {
-        border: 1px solid #eaeaea;
-        padding: 15px;
-        margin-bottom: 15px;
-        border-radius: 8px;
-    }
+.form-control:focus {
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.1);
+}
 
-    .cart-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px;
-        border-bottom: 1px solid #eaeaea;
-    }
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
 
-    .profile-avatar {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background-color: #f8f9fa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 20px;
-    }
+.btn-primary {
+    background-color: var(--primary-black);
+    border: none;
+    color: var(--primary-white);
+}
 
-    .status-badge {
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 500;
-    }
+.btn-primary:hover {
+    background-color: var(--text-dark);
+    transform: translateY(-1px);
+}
 
-    .status-delivered {
-        background-color: #e8f5e9;
-        color: #2e7d32;
-    }
+.btn-outline-secondary {
+    border: 1px solid var(--primary-black);
+    color: var(--primary-black);
+    background-color: var(--primary-white);
+}
 
-    .quantity-control {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+.btn-outline-secondary:hover {
+    background-color: var(--primary-black);
+    color: var(--primary-white);
+    border-color: var(--primary-black);
+}
 
-    .quantity-btn {
-        background: none;
-        border: 1px solid #eaeaea;
-        padding: 5px 10px;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+/* Address Cards */
+.address-card {
+    border: 1px solid var(--border-light);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: var(--primary-white);
+}
+
+.address-card:hover {
+    box-shadow: 0 5px 15px rgba(255, 107, 53, 0.1);
+    border-color: var(--primary-orange);
+}
+
+/* Order Cards */
+.order-card {
+    border: 1px solid var(--border-light);
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    background: var(--primary-white);
+    transition: all 0.3s ease;
+}
+
+.order-card:hover {
+    box-shadow: 0 5px 15px rgba(255, 107, 53, 0.1);
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.pending {
+    background-color: var(--light-orange);
+    color: var(--primary-orange);
+}
+
+.status-badge.processing {
+    background-color: var(--primary-white);
+    color: var(--primary-black);
+    border: 1px solid var(--primary-black);
+}
+
+.status-badge.shipped {
+    background-color: var(--light-orange);
+    color: var(--primary-orange);
+}
+
+.status-badge.delivered {
+    background-color: var(--primary-black);
+    color: var(--primary-white);
+}
+
+.status-badge.cancelled {
+    background-color: var(--text-dark);
+    color: var(--primary-white);
+}
+
+/* Cart Items */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.cart-item:hover {
+    background-color: var(--light-orange);
+}
+
+/* Quantity Controls */
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.quantity-btn {
+    background: var(--primary-black);
+    color: var(--primary-white);
+    border: none;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quantity-btn:hover {
+    background-color: var(--text-dark);
+}
+
+/* Profile Avatar */
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: var(--primary-white);
+    border: 2px solid var(--primary-orange);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+/* Input Groups */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group-text {
+    background-color: var(--primary-white);
+    border-color: var(--border-light);
+}
+
+/* Section Headers */
+.section-header {
+    color: var(--primary-black);
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-orange);
+}
+
+/* Text Colors */
+.text-muted {
+    color: var(--text-light) !important;
+}
+
+/* Dividers */
+.border-top {
+    border-top-color: var(--border-light) !important;
+}
+
+/* Delete Buttons */
+.btn-outline-danger {
+    color: var(--primary-black);
+    border-color: var(--primary-black);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--primary-black);
+    border-color: var(--primary-black);
+    color: var(--primary-white);
+}
+.order-products {
+    text-align: left;
+    max-width: 250px;
+    margin: 0 auto;
+}
+.order-products .d-flex {
+    align-items: center;
+    margin-bottom: 8px;
+}
+.order-products strong {
+    display: block;
+    font-size: 0.9rem;
+}
+.order-products .text-muted {
+    font-size: 0.75rem;
+}
 </style>
-<body>
-    <div class="container">
-        <section class="profile-section">
-            <!-- Profile Navigation -->
-            <ul class="nav profile-tabs" id="profileTabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" data-toggle="tab" href="#profile">
-                        <i class="bi bi-person"></i> Profile
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#addresses">
-                        <i class="bi bi-geo-alt"></i> Addresses
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#orders">
-                        <i class="bi bi-box"></i> Orders
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#cart">
-                        <i class="bi bi-cart"></i> Cart
-                    </a>
-                </li>
-            </ul>
 
-            <!-- Tab Content -->
-            <div class="tab-content">
-                <!-- Profile Tab -->
-                <div class="tab-pane fade show active" id="profile">
-                    <div class="profile-card">
-                        <div class="profile-avatar">
-                            <i class="bi bi-person" style="font-size: 2rem;"></i>
+<div class="container">
+    <section class="profile-section">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="bi bi-person" style="font-size: 3rem;"></i>
+            </div>
+            <h2 class="text-center mb-0"><%=user.fullname%></h2>
+            <p class="text-center opacity-75"><%=user.email%></p>
+        </div>
+
+        <!-- Profile Navigation -->
+        <ul class="nav profile-tabs" id="profileTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#profile">
+                    <i class="bi bi-person"></i> Profile
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#addresses">
+                    <i class="bi bi-geo-alt"></i> Addresses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#orders">
+                    <i class="bi bi-box"></i> Orders
+                </a>
+            </li>
+            <!-- <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#cart">
+                    <i class="bi bi-cart"></i> Cart
+                </a>
+            </li> -->
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Profile Tab -->
+            <div class="tab-pane fade show active" id="profile">
+                <div class="profile-card">
+                    <!-- Form to update name -->
+                    <form method="post" action="/updateName">
+                        <div class="mb-4">
+                            <label class="form-label">Name</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="fullname" value="<%=user.fullname%>" readonly>
+                                <button type="button" class="btn btn-outline-primary" onclick="enableEdit(this)">Edit</button>
+                            </div>
                         </div>
-                        <form>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Name</label>
-                                    <input type="text" class="form-control" value="<%=user.fullname%>">
-                                </div>
+                    </form>
+
+                    <!-- Form to update email -->
+                    <form id="updateEmailForm" method="post" action="/sendOtpForEmailUpdate">
+                        <div class="mb-4">
+                            <label class="form-label">Email</label>
+                            <div class="input-group">
+                                <input type="email" class="form-control" name="email" value="<%=user.email%>" readonly>
+                                <button type="button" class="btn btn-outline-primary" onclick="enableEdit(this)">Edit</button>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" value="<%=user.email%>">
+                        </div>
+                    </form>
+                    
+
+
+                    <!-- Form to update phone -->
+                    <form method="post" action="/updatePhone">
+                        <div class="mb-4">
+                            <label class="form-label d-flex align-items-center gap-2">
+                                Referral Code
+                                <i class="bi bi-info-circle text-primary" 
+                                data-bs-toggle="tooltip" 
+                                data-bs-placement="top" 
+                                title="Share this code with friends to earn rewards!">
+                                </i>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="referralCode" value="<%=user.referralCode%>" readonly>
+                                <button class="btn btn-outline-primary" onclick="copyReferralCode()">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Phone</label>
-                                <input type="tel" class="form-control" value="<%=user.phone%>">
+                            <div class="mt-2">
+                                <p class="text-muted small mb-1" style="color: green;">
+                                    <i class="bi bi-gift text-primary"></i> 
+                                    Invite friends and earn ₹50 when they register their account!
+                                </p>
                             </div>
-                            <button type="submit" class="btn btn-primary">Update Profile</button>
-                            <button type="button" class="btn btn-outline-primary">Change Password</button>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Addresses Tab -->
+            <div class="tab-pane fade" id="addresses">
+                <div class="d-flex justify-content-end mb-4">
+                    <button class="btn btn-primary" onclick="toggleAddressForm()">
+                        <i class="bi bi-plus"></i> Add New Address
+                    </button>
                 </div>
 
-                <!-- Addresses Tab -->
-                <div class="tab-pane fade" id="addresses">
-                    <div id="addressFormContainer" style="display: none;" class="profile-card">
-                        <form id="newAddressForm" method="post" action="/addresses">
-                            <div class="mb-3">
+                <!-- Address Form -->
+                <div id="addressFormContainer" style="display: none;" class="profile-card">
+                    <form id="newAddressForm" method="post" action="/addresses">
+                        <div class="row g-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Address Type</label>
-                                <input type="text" class="form-control" name="addressType" placeholder="Home, Office, etc." required>
+                                <input type="text" class="form-control" name="addressType">
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Name</label>
-                                <input type="text" class="form-control" name="name" placeholder="Enter your name" required>
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" name="name">
                             </div>
-                            <div class="mb-3">
+                            <div class="col-12">
                                 <label class="form-label">Street Address</label>
-                                <input type="text" class="form-control" name="streetAddress" placeholder="Enter your street address" required>
+                                <input type="text" class="form-control" name="streetAddress">
                             </div>
-                            <div class="mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">City</label>
-                                <input type="text" class="form-control" name="city" placeholder="Enter city" required>
+                                <input type="text" class="form-control" name="city">
                             </div>
-                            <div class="mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Landmark</label>
-                                <input type="text" class="form-control" name="landMark" placeholder="Enter landmark" required>
+                                <input type="text" class="form-control" name="landMark">
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">State</label>
-                                    <input type="text" class="form-control" name="state" placeholder="Enter state" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Zip Code</label>
-                                    <input type="number" class="form-control" name="pincode" placeholder="Enter zip code" required>
-                                </div>
+                            <div class="col-md-4">
+                                <label class="form-label">State</label>
+                                <input type="text" class="form-control" name="state">
                             </div>
-                            <div class="mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Pincode</label>
+                                <input type="text" class="form-control" name="pincode">
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label">Phone</label>
-                                <input type="tel" class="form-control" name="phone" placeholder="Enter phone number" required>
+                                <input type="tel" class="form-control" name="phone">
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Alternate Phone</label>
-                                <input type="tel" class="form-control" name="altPhone" placeholder="Enter alternate phone number" required>
+                            <div class="col-12">
+                                <label class="form-label">Alternate Phone (Optional)</label>
+                                <input type="tel" class="form-control" name="altPhone">
                             </div>
-                            <div class="d-flex gap-2">
+                            <div class="col-12">
                                 <button type="submit" class="btn btn-primary">Save Address</button>
                                 <button type="button" class="btn btn-outline-secondary" onclick="toggleAddressForm()">Cancel</button>
                             </div>
-                        </form>
-                    </div>
-                    
-                    <div class="d-flex justify-content-end mb-3">
-                        <button class="btn btn-primary" onclick="toggleAddressForm()">
-                            <i class="bi bi-plus"></i> Add New Address
-                        </button>
-                    </div>
-                    <% addresses.forEach(address => { %>
-                        <div class="address-card">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h6 class="mb-1"><%= address.addressType %></h6>
-                                    <p><%= address.name %></p>
-                                    <p class="mb-1"><%= address.city %></p>
-                                    <p class="mb-0"><%= address.landMark %>, <%= address.state %> <%= address.pincode %></p>
-                                    <p class="mb-0"><%= address.phone %></p>
-                                    <p class="mb-0"><%= address.altPhone %></p>
-                                </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-primary me-2">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Edit Address Form -->
+                <div id="editAddressFormContainer" style="display: none;" class="profile-card">
+                    <form id="editAddressForm" method="post" action="/editAddress">
+                        <input type="hidden" id="editAddressId" name="id">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Address Type</label>
+                                <input type="text" class="form-control" id="editAddressType" name="addressType">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="editName" name="name">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Street Address</label>
+                                <input type="text" class="form-control" id="editStreetAddress" name="streetAddress">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" id="editCity" name="city">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Landmark</label>
+                                <input type="text" class="form-control" id="editLandMark" name="landMark">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">State</label>
+                                <input type="text" class="form-control" id="editState" name="state">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Pincode</label>
+                                <input type="text" class="form-control" id="editPincode" name="pincode">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="editPhone" name="phone">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Alternate Phone (Optional)</label>
+                                <input type="tel" class="form-control" id="editAltPhone" name="altPhone">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Update Address</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="toggleEditAddressForm()">Cancel</button>
                             </div>
                         </div>
-                    <% }) %>
+                    </form>
                 </div>
 
-                <!-- Orders Tab -->
-                <div class="tab-pane fade" id="orders">
-                    <div class="order-card">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <h6 class="mb-1">Order #12345</h6>
-                                <p class="mb-0 text-muted">January 14, 2025</p>
+                <!-- Address Grid -->
+                <div class="address-grid">
+                    <% if (addresses && addresses.length > 0) { %>
+                        <% addresses.forEach(address => { %>
+                            <div class="address-card">
+                                <span class="address-type"><%=address.addressType%></span>
+                                <h5 class="mb-3"><%=address.name%></h5>
+                                <p class="mb-2"><%=address.streetAddress%></p>
+                                <p class="mb-2"><%=address.city%>, <%=address.state%> <%=address.pincode%></p>
+                                <p class="mb-2"><i class="bi bi-telephone"></i> <%=address.phone%></p>
+                                <% if (address.altPhone) { %>
+                                    <p class="mb-3"><i class="bi bi-telephone"></i> <%=address.altPhone%></p>
+                                <% } %>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editAddress('<%=address._id%>', '<%=address.addressType%>', '<%=address.name%>', '<%=address.streetAddress%>', '<%=address.city%>', '<%=address.landMark%>', '<%=address.state%>', '<%=address.pincode%>', '<%=address.phone%>', '<%=address.altPhone%>')">Edit</button>
+                                    <form method="post" action="/deleteAddress" style="display:inline;">
+                                        <input type="hidden" name="id" value="<%=address._id%>">
+                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                </div>
                             </div>
-                            <span class="status-badge status-delivered">Delivered</span>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="profile-card">
+                            <p class="text-center mb-0">No addresses found.</p>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="mb-0">2 items</p>
-                                <p class="mb-0">Total: $99.99</p>
-                            </div>
-                            <button class="btn btn-outline-danger btn-sm">Cancel Order</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cart Tab -->
-                <div class="tab-pane fade" id="cart">
-                    <div class="profile-card">
-                        <div class="cart-item">
-                            <div>
-                                <h6 class="mb-1">Product Name</h6>
-                                <p class="mb-0">$49.99</p>
-                            </div>
-                            <div class="quantity-control">
-                                <button class="quantity-btn">-</button>
-                                <span>1</span>
-                                <button class="quantity-btn">+</button>
-                                <button class="btn btn-sm btn-outline-danger ms-3">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                            <h6 class="mb-0">Total</h6>
-                            <h6 class="mb-0">$49.99</h6>
-                        </div>
-                    </div>
+                    <% } %>
                 </div>
             </div>
-        </section>
-    </div>
 
-    <script>
-        fetch('/addresses', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-            // body: JSON.stringify({
-               
-            // })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('data:',data);
+            <!-- Orders Tab -->
+            <div class="tab-pane fade" id="orders">
+                <% if (orders && orders.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered text-center align-middle orders-table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Products</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% orders.forEach(order => { %>
+                                    <tr>
+                                        <td>
+                                            <a href="/profile/<%= order.orderId %>" class="text-primary text-decoration-none">
+                                                #<%= order.orderId %>
+                                            </a>
+                                        </td>
+                                        <td><%= new Date(order.createdOn).toLocaleDateString() %></td>
+                                        <td>
+                                            <div class="order-products">
+                                                <% order.orderedItems.forEach(item => { %>
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <span class="me-2"><%= item.quantity %> x</span>
+                                                        <div>
+                                                            <strong><%= item.product.productName %></strong>
+                                                            <small class="d-block text-muted">₹<%= item.price %> each</small>
+                                                        </div>
+                                                    </div>
+                                                <% }); %>
+                                            </div>
+                                        </td>
+                                        <td>₹<%= order.finalAmount %></td>
+                                        <td>
+                                            <span class="badge bg-<%= 
+                                                order.status === 'Cancelled' ? 'danger' : 
+                                                order.status === 'Delivered' ? 'success' : 
+                                                'warning' 
+                                            %>">
+                                                <%= order.status %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <% if (order.paymentStatus === 'Pending' || order.paymentStatus === 'Failed' && order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== 'Returned') { %>
+                                                <button 
+                                                    onclick="initiatePayment('<%= order.orderId %>', '<%= order.finalAmount %>')"
+                                                    class="btn btn-sm btn-success">
+                                                    Pay Now
+                                                </button>
+                                            <% } else { %>
+                                                <span class="badge bg-<%= 
+                                                    order.paymentStatus === 'Completed' ? 'success' :
+                                                    order.paymentStatus === 'Failed' ? 'danger' :
+                                                    order.paymentStatus === 'Refunded' ? 'info' : 'warning'
+                                                %>">
+                                                    <%= order.paymentStatus %>
+                                                </span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <% if (order.status === 'Pending' || order.status === 'Processing') { %>
+                                                <form method="post" action="/cancelOrder" style="display:inline;">
+                                                    <input type="hidden" name="orderId" value="<%= order.orderId %>">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                                </form>
+                                            <% } else if (order.status === 'Delivered') { %>
+                                                <form method="post" action="/returnRequestget" style="display:inline;">
+                                                    <input type="hidden" name="orderId" value="<%= order.orderId %>">
+                                                    <button type="submit" class="btn btn-sm btn-outline-warning">Request Return</button>
+                                                </form>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="profile-card">
+                        <p class="text-center mb-0">No orders found.</p>
+                    </div>
+                <% } %>
+            </div>
             
-            // document.body.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-        })
-        .catch(error => {
-            console.error('There was an error!', error);
-        });
-        function toggleAddressForm() {
-            const formContainer = document.getElementById('addressFormContainer');
-            formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
-        }
-        // Tab switching
-        document.querySelectorAll('.nav-link').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                e.preventDefault();
-                // Remove active class from all tabs
-                document.querySelectorAll('.nav-link').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-pane').forEach(p => {
-                    p.classList.remove('show', 'active');
-                });
-                
-                // Add active class to clicked tab
-                tab.classList.add('active');
-                const target = document.querySelector(tab.getAttribute('href'));
-                target.classList.add('show', 'active');
-            });
-        });
+            
 
-        // Quantity controls
-        document.querySelectorAll('.quantity-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const span = btn.parentElement.querySelector('span');
-                let quantity = parseInt(span.textContent);
-                if (btn.textContent === '+') {
-                    span.textContent = quantity + 1;
-                } else if (quantity > 1) {
-                    span.textContent = quantity - 1;
+            <!-- Cart Tab -->
+            <!-- <div class="tab-pane fade" id="cart">
+                <div class="profile-card">
+                    <% if (cart && cart.items.length > 0) { %>
+                        <% cart.items.forEach(item => { %>
+                            <div class="cart-item">
+                                <div>
+                                    <h6 class="mb-1"><%=item.productId.name%></h6>
+                                    <p class="mb-0">₹<%=item.price%> each</p>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn" onclick="updateQuantity('<%=item.productId._id%>', 'decrease')">-</button>
+                                        <span class="px-3"><%=item.quantity%></span>
+                                        <button class="quantity-btn" onclick="updateQuantity('<%=item.productId._id%>', 'increase')">+</button>
+                                    </div>
+                                    <form method="post" action="/removeFromCart" style="display:inline;">
+                                        <input type="hidden" name="productId" value="<%=item.productId._id%>">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        <% }); %>
+                        
+                        <div class="cart-summary mt-4 p-3 bg-light rounded">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Subtotal</h6>
+                                <h6 class="mb-0">₹<%=cart.items.reduce((acc, item) => acc + (item.price * item.quantity), 0)%></h6>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Total</h5>
+                                <h5 class="mb-0">₹<%=cart.items.reduce((acc, item) => acc + item.totalPrice, 0)%></h5>
+                            </div>
+                            <div class="d-grid gap-2 mt-3">
+                                <a href="/checkout" class="btn btn-primary">Proceed to Checkout</a>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center py-5">
+                            <i class="bi bi-cart-x" style="font-size: 3rem;"></i>
+                            <p class="mb-3 mt-2">Your cart is empty</p>
+                            <a href="/products" class="btn btn-primary">Continue Shopping</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div> -->
+    </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+function validateAddressForm(form) {
+
+    const errorElements = form.querySelectorAll('.text-danger');
+    errorElements.forEach(el => el.remove());
+
+    let isValid = true;
+    const addressTypeInput = form.querySelector('input[name="addressType"]');
+    if (!addressTypeInput.value.trim()) {
+        addErrorMessage(addressTypeInput, 'Address Type is required');
+        isValid = false;
+    }
+
+    const nameInput = form.querySelector('input[name="name"]');
+    if (!nameInput.value.trim()) {
+        addErrorMessage(nameInput, 'Full Name is required');
+        isValid = false;
+    } else if (!/^[A-Za-z\s]{2,50}$/.test(nameInput.value.trim())) {
+        addErrorMessage(nameInput, 'Name must be 2-50 characters and contain only letters');
+        isValid = false;
+    }
+
+    const streetAddressInput = form.querySelector('input[name="streetAddress"]');
+    if (!streetAddressInput.value.trim()) {
+        addErrorMessage(streetAddressInput, 'Street Address is required');
+        isValid = false;
+    } else if (streetAddressInput.value.trim().length < 5 || streetAddressInput.value.trim().length > 200) {
+        addErrorMessage(streetAddressInput, 'Street Address must be between 5-200 characters');
+        isValid = false;
+    }
+
+    const cityInput = form.querySelector('input[name="city"]');
+    if (!cityInput.value.trim()) {
+        addErrorMessage(cityInput, 'City is required');
+        isValid = false;
+    } else if (!/^[A-Za-z\s]{2,50}$/.test(cityInput.value.trim())) {
+        addErrorMessage(cityInput, 'City must be 2-50 characters and contain only letters');
+        isValid = false;
+    }
+
+    const landmarkInput = form.querySelector('input[name="landMark"]');
+    if (landmarkInput && landmarkInput.value.trim() && landmarkInput.value.trim().length > 100) {
+        addErrorMessage(landmarkInput, 'Landmark must be less than 100 characters');
+        isValid = false;
+    }
+
+    const stateInput = form.querySelector('input[name="state"]');
+    if (!stateInput.value.trim()) {
+        addErrorMessage(stateInput, 'State is required');
+        isValid = false;
+    } else if (!/^[A-Za-z\s]{2,50}$/.test(stateInput.value.trim())) {
+        addErrorMessage(stateInput, 'State must be 2-50 characters and contain only letters');
+        isValid = false;
+    }
+
+    const pincodeInput = form.querySelector('input[name="pincode"]');
+    if (!pincodeInput.value.trim()) {
+        addErrorMessage(pincodeInput, 'Pincode is required');
+        isValid = false;
+    } else if (!/^\d{6}$/.test(pincodeInput.value.trim())) {
+        addErrorMessage(pincodeInput, 'Pincode must be 6 digits');
+        isValid = false;
+    }
+
+
+    const phoneInput = form.querySelector('input[name="phone"]');
+    if (!phoneInput.value.trim()) {
+        addErrorMessage(phoneInput, 'Phone number is required');
+        isValid = false;
+    } else if (!/^\d{10}$/.test(phoneInput.value.trim())) {
+        addErrorMessage(phoneInput, 'Phone number must be 10 digits');
+        isValid = false;
+    }
+
+    const altPhoneInput = form.querySelector('input[name="altPhone"]');
+    if (altPhoneInput && altPhoneInput.value.trim() && !/^\d{10}$/.test(altPhoneInput.value.trim())) {
+        addErrorMessage(altPhoneInput, 'Alternate phone number must be 10 digits');
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+function addErrorMessage(inputElement, message) {
+    const errorElement = document.createElement('div');
+    errorElement.className = 'text-danger small mt-1';
+    errorElement.textContent = message;
+    
+    inputElement.closest('.col-md-6, .col-12, .col-md-4')
+        .appendChild(errorElement);
+
+    inputElement.classList.add('is-invalid');
+}
+document.addEventListener('DOMContentLoaded', () => {
+    // Address form validation code remains the same
+    const newAddressForm = document.getElementById('newAddressForm');
+    const editAddressForm = document.getElementById('editAddressForm');
+
+    if (newAddressForm) {
+        newAddressForm.addEventListener('submit', function(e) {
+            if (!validateAddressForm(this)) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    if (editAddressForm) {
+        editAddressForm.addEventListener('submit', function(e) {
+            if (!validateAddressForm(this)) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    document.querySelectorAll('#newAddressForm input, #editAddressForm input').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+            const errorElement = this.closest('.col-md-6, .col-12, .col-md-4')
+                .querySelector('.text-danger');
+            if (errorElement) {
+                errorElement.remove();
+            }
+        });
+    });
+
+    // Add event listeners for cancel order buttons
+    document.querySelectorAll('form[action="/cancelOrder"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const orderId = this.querySelector('input[name="orderId"]').value;
+            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you really want to cancel this order?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#000',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Cancel Order',
+                cancelButtonText: 'No, Keep Order'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit the form if confirmed
+                    this.submit();
                 }
             });
         });
-    </script>
+    });
+    document.querySelectorAll('form[action="/deleteAddress"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            Swal.fire({
+                title: 'Delete Address',
+                text: 'Are you sure you want to delete this address?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#000',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit the form if confirmed
+                    this.submit();
+                }
+            });
+        });
+    });
+});
+
+
+
+    function enableEdit(button) {
+    const inputField = button.previousElementSibling;
+    const inputGroup = button.closest('.input-group');
+    const form = button.closest('form');
+
+    inputField.removeAttribute('readonly');
+    inputField.focus();
+
+    button.style.display = 'none';
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'submit';
+    saveButton.className = 'btn btn-primary ml-2';
+    saveButton.textContent = 'Save';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.className = 'btn btn-outline-secondary ml-2';
+    cancelButton.textContent = 'Cancel';
+
+    inputGroup.querySelectorAll('.btn-primary, .btn-outline-secondary').forEach(btn => btn.remove());
+
+    inputGroup.appendChild(saveButton);
+    inputGroup.appendChild(cancelButton);
+
+    cancelButton.addEventListener('click', () => {
+        inputField.setAttribute('readonly', true);
+        inputField.value = inputField.defaultValue;
+        
+        saveButton.remove();
+        cancelButton.remove();
+        
+        button.style.display = 'block';
+    });
+
+    if(form.id === 'updataEmailForm'){
+        form.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+        const response = await fetch('/sendOtpForEmailUpdate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: inputField.value
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            window.location.href = '/sendOtpForEmailUpdate';
+        } else {
+            alert(result.message || 'An error occurred');
+        }
+    } catch (error) {
+        console.error('Detailed Error:', error);
+        alert(error.message || 'An unexpected error occurred');
+    }
+};
+    }
+  }
+  function toggleAddressForm() {
+     const formContainer = document.getElementById('addressFormContainer');
+     const editFormContainer = document.getElementById('editAddressFormContainer');
+     
+     formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
+     editFormContainer.style.display = 'none';
+     
+     if (formContainer.style.display === 'none') {
+         document.getElementById('newAddressForm').reset();
+     }
+  }
+
+  
+  function toggleEditAddressForm() {
+     const editFormContainer = document.getElementById('editAddressFormContainer');
+     const addFormContainer = document.getElementById('addressFormContainer');
+     
+     editFormContainer.style.display = editFormContainer.style.display === 'none' ? 'block' : 'none';
+     addFormContainer.style.display = 'none';
+     
+     if (editFormContainer.style.display === 'none') {
+         document.getElementById('editAddressForm').reset();
+     }
+  }
+  
+  function editAddress(id, addressType, name, streetAddress, city, landMark, state, pincode, phone, altPhone) {
+     toggleEditAddressForm();
+     
+     document.getElementById('editAddressId').value = id;
+     document.getElementById('editAddressType').value = addressType;
+     document.getElementById('editName').value = name;
+     document.getElementById('editStreetAddress').value = streetAddress;
+     document.getElementById('editCity').value = city;
+     document.getElementById('editLandMark').value = landMark || '';
+     document.getElementById('editState').value = state;
+     document.getElementById('editPincode').value = pincode;
+     document.getElementById('editPhone').value = phone;
+     document.getElementById('editAltPhone').value = altPhone || '';
+     
+     document.getElementById('editAddressFormContainer').scrollIntoView({ behavior: 'smooth' });
+  }
+  
+
+async function initiatePayment(orderId, amount) {
+    try {
+        console.log('Initiating payment for order:', orderId, 'amount:', amount);
+        
+        const orderResponse = await fetch('/createOrder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                amount: amount,
+                currency: 'INR',
+                orderId: orderId 
+            })
+        });
+
+        console.log('Order creation response status:', orderResponse.status);
+        const orderData = await orderResponse.json();
+        console.log('Order creation response:', orderData);
+        
+        if (!orderData.success) {
+            throw new Error(orderData.message || 'Failed to create order');
+        }
+
+        const options = {
+            key: '<%= process.env.RAZORPAY_KEY_ID %>',
+            amount: orderData.amount,
+            currency: 'INR',
+            name: 'Your Store Name',
+            description: `Payment for order ${orderId}`,
+            order_id: orderData.orderId,
+            handler: async function (response) {
+                console.log('Payment success response:', response);
+                try {
+                    const verifyResponse = await fetch('/verifyPayment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            orderId: orderId
+                        })
+                    });
+
+                    console.log('Verification response status:', verifyResponse.status);
+                    const verifyData = await verifyResponse.json();
+                    console.log('Verification response:', verifyData);
+
+                    if (verifyData.success) {
+                        const updateResponse = await fetch('/updatePaymentStatus', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                orderId: orderId,
+                                paymentId: response.razorpay_payment_id
+                            })
+                        });
+
+                        const updateData = await updateResponse.json();
+                        
+                        if (updateData.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Payment Successful!',
+                                text: 'Your order has been confirmed.',
+                                showConfirmButton: false,
+                                timer: 2000
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            throw new Error('Failed to update order status');
+                        }
+                    } else {
+                        throw new Error(verifyData.message || 'Payment verification failed');
+                    }
+                } catch (error) {
+                    console.error('Error in payment handler:', error);
+                    handlePaymentError(error);
+                }
+            },
+            prefill: {
+                name: '<%= user.fullname %>',
+                email: '<%= user.email %>',
+                contact: '<%= user.phone %>'
+            },
+            theme: {
+                color: '#000000'
+            },
+            modal: {
+                ondismiss: function() {
+                    console.log('Payment modal dismissed');
+                }
+            }
+        };
+
+        console.log('Initializing Razorpay with options:', { ...options, key: '***' });
+        
+        // Initialize Razorpay
+        const razorpayInstance = new Razorpay(options);
+        
+        // Handle payment failure
+        razorpayInstance.on('payment.failed', function (response) {
+            console.error('Payment failed:', response.error);
+            handlePaymentError(new Error(response.error.description || 'Payment failed'));
+        });
+
+        razorpayInstance.open();
+
+    } catch (error) {
+        console.error('Error in initiatePayment:', error);
+        handlePaymentError(error);
+    }
+}
+
+function handlePaymentError(error) {
+    console.error('Payment error details:', error);
+    Swal.fire({
+        icon: 'error',
+        title: 'Payment Failed',
+        text: error.message || 'Something went wrong. Please try again.',
+        confirmButtonColor: '#000000'
+    });
+}
+
+  </script>
 <%-include('../../views/partials/user/footer')%>

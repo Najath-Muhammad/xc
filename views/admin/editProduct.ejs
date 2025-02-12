@@ -152,13 +152,13 @@
         <ul>
             <li><a href="/admin/dashboard">Dashboard</a></li>
             <li><a href="/admin/users">User</a></li>
-            <li><a href="#">Order</a></li>
+            <li><a href="/admin/orders">Order</a></li>
             <li><a href="/admin/addProducts">Add Products</a></li>
             <li><a href="/admin/products">Products</a></li>
             <li><a href="/admin/brands">Brands</a></li>
             <li><a href="/admin/category">Category</a></li>
-            <li><a href="#">Offers</a></li>
-            <li><a href="#">Coupons</a></li>
+            <li><a href="/admin/offers">Offers</a></li>
+            <li><a href="/admin/coupons">Coupons</a></li>
         </ul>
     </div>
 
@@ -185,7 +185,7 @@
                                     <label class="form-label">Brand</label>
                                     <select class="form-select" name="brand" id="brand">
                                         <%for(let i=0;i<brand.length;i++){%>
-                                            <option value="<%=brand[i].brandName%>"><%=brand[i].brandName%></option>
+                                            <option value="<%=brand[i].brandName%>"><%=product.brand%></option>
                                         <%}%>
                                     </select>
                                     <div id="brand-error" class="error-message"></div>
@@ -201,7 +201,7 @@
                                     <div class="col-lg-4">
                                         <div class="mb-4">
                                             <label class="form-label">Regular price</label>
-                                            <input placeholder="$" name="regularPrice" type="text" value="<%=product.regularPrice%>" class="form-control" id="regularPrice">
+                                            <input placeholder="₹" name="regularPrice" type="text" value="<%=product.regularPrice%>" class="form-control" id="regularPrice">
                                             <div id="regularPrice-error" class="error-message"></div>
                                         </div>
                                     </div>
@@ -234,7 +234,7 @@
                                             <label class="form-label">Category</label>
                                             <select class="form-select" name="category" id="category">
                                                 <%for(let i=0;i<cat.length;i++){%>
-                                                    <option value="<%=cat[i].name%>"><%=cat[i].name%></option>
+                                                    <option value="<%=cat[i].name%>"><%=product.category.name%></option>
                                                 <%}%>
                                             </select>
                                             <div id="category-error" class="error-message"></div>
@@ -350,10 +350,10 @@
                 isValid = false;
             }
 
-            if (!images.length) {
-                displayErrorMessage("images-error", 'Please select an image.');
-                isValid = false;
-            }
+            // if (!images.length) {
+            //     displayErrorMessage("images-error", 'Please select an image.');
+            //     isValid = false;
+            // }
 
             return isValid;
         }

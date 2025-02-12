@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
+        }
+        .order-details-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .product-image {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+        }
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-processing { background-color: #cce5ff; color: #004085; }
+        .status-shipped { background-color: #d4edda; color: #155724; }
+        .status-delivered { background-color: #c3e6cb; color: #1e7e34; }
+        .status-cancelled { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container order-details-container">
+        <div class="order-header">
+            <h1>Order Details</h1>
+            <a href="/admin/orders" class="btn btn-secondary">Back to Orders</a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Order Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Order ID</strong>
+                                <p><%= order.orderId %></p>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Order Date</strong>
+                                <p><%= order.createdOn.toLocaleDateString() %></p>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Status</strong>
+                                <p>
+                                    <span class="status-badge status-<%= order.status.toLowerCase().replace(' ', '-') %>">
+                                        <%= order.status %>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Order Items</h4>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% productsDetails.forEach(item => { %>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <% if (item.productDetails && item.productDetails.images && item.productDetails.images.length > 0) { %>
+                                                <img src="<%= item.productDetails.images[0] %>" class="product-image me-3" alt="Product Image">
+                                            <% } %>
+                                            <div>
+                                                <strong><%= item.productDetails ? item.productDetails.name : 'Product Not Found' %></strong>
+                                                <% if (item.productDetails) { %>
+                                                    <br>
+                                                    <small class="text-muted">Product ID: <%= item.productDetails.productId %></small>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><%= item.quantity %></td>
+                                    <td>₹<%= item.price.toLocaleString() %></td>
+                                    <td>₹<%= (item.quantity * item.price).toLocaleString() %></td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Customer Details</h4>
+                    </div>
+                    <div class="card-body">
+                        <strong>Name</strong>
+                        <p><%= user.name %></p>
+
+                        <strong>Email</strong>
+                        <p><%= user.email %></p>
+
+                        <strong>Phone</strong>
+                        <p><%= user.phone || 'Not provided' %></p>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Order Summary</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Total Price</span>
+                            <strong>₹<%= order.totalPrice.toLocaleString() %></strong>
+                        </div>
+                        <% if (order.discount > 0) { %>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Discount</span>
+                            <strong>₹<%= order.discount.toLocaleString() %></strong>
+                        </div>
+                        <% } %>
+                        <div class="d-flex justify-content-between">
+                            <span>Final Amount</span>
+                            <strong>₹<%= order.finalAmount.toLocaleString() %></strong>
+                        </div>
+                    </div>
+                </div>
+
+                <% if (address) { %>
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Shipping Address</h4>
+                    </div>
+                    <div class="card-body">
+                        <p><%= address.address || 'No address provided' %></p>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

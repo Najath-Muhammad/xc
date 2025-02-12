@@ -5,133 +5,340 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signup Page</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background-image: url('https://via.placeholder.com/1920x1080');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
         }
-        .form-container {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 400px;
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .validation-messages {
-            margin-top: 10px;
-            color: red;
+
+        .signup-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            backdrop-filter: blur(10px);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+            margin: 40px 0;
         }
-        .login-link {
-            margin-top: 15px;
+
+        .signup-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .signup-container h2 {
             text-align: center;
+            margin-bottom: 30px;
+            color: #4a43c9;
+            font-size: 28px;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .signup-container h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .form-group:focus-within label {
+            color: #4a43c9;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            padding-left: 45px;
+            border: 2px solid #e1e1e1;
+            border-radius: 12px;
+            font-size: 14px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            top: 46px;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .form-group:focus-within i {
+            color: #667eea;
+        }
+
+        .validation-messages {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            padding-left: 5px;
+            display: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-signup {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .btn-signup:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-google {
+            background: white;
+            color: #444;
+            border: 1px solid #e1e1e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-google:hover {
+            background: #f8f9fa;
+            border-color: #999;
+        }
+
+        .btn-google img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e1e1e1;
+        }
+
+        .divider span {
+            padding: 0 15px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .footer-text a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .footer-text a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        .alert {
+            border-radius: 12px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <h2 class="text-center">Signup</h2>
+    <div class="signup-container">
+        <h2>Create Account</h2>
         <form id="signupForm" method="POST" action="/signup">
-            <div class="mb-3">
-                <label for="fullname" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Enter your full name">
+            <div class="form-group">
+                <label for="fullname">Full Name</label>
+                <i class="fas fa-user"></i>
+                <input type="text" id="fullname" name="fullname" placeholder="Enter your full name">
                 <div class="validation-messages" id="fullnameValidation"></div>
             </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email address</label>
-                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email">
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email" name="email" placeholder="Enter your email">
                 <div class="validation-messages" id="emailValidation"></div>
             </div>
-            <div class="mb-3">
-                <label for="phone" class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter your phone number">
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <i class="fas fa-phone"></i>
+                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
                 <div class="validation-messages" id="phoneValidation"></div>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password">
+
+            <div class="form-group">
+                <label for="referralCode">Referral Code (Optional)</label>
+                <i class="fas fa-users"></i>
+                <input type="text" id="referralCode" name="referralCode" placeholder="Enter referral code if you have one">
+                <div class="validation-messages" id="referralCodeValidation"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" name="password" placeholder="Enter your password">
                 <div class="validation-messages" id="passwordValidation"></div>
             </div>
-            <div class="mb-3">
-                <label for="confirmPassword" class="form-label">Confirm Password</label>
-                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password">
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <i class="fas fa-lock"></i>
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password">
                 <div class="validation-messages" id="confirmPasswordValidation"></div>
             </div>
+
             <%if(locals.message && message.length>0){%>
-                <div class="alert alert-danger text-center" id="err-div">
+                <div class="alert alert-danger text-center">
                     <%=message%>
                 </div>
             <%}%>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Signup</button>
+
+            <button type="submit" class="btn btn-signup">Create Account</button>
+            
+            <div class="divider">
+                <span>OR</span>
             </div>
-            <div class="login-link">
-                <div class="social-btns">
-                    <p>
-                        Or Signup With Google
-                    </p>
-                    <a type="button" class="btn btn-outline-primary" href="/auth/google">Google</a>
-                </div>
-                <p>Already registered? <a href="/login">Log in here</a></p>
-            </div>
+
+            <a href="/auth/google" style="text-decoration: none;">
+                <button type="button" class="btn btn-google">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCI+PHBhdGggZmlsbD0iI0VBNDMzNSIgZD0iTTI0IDkuNWMzLjU0IDAgNi43MSAxLjIyIDkuMjEgMy42bDYuODUtNi44NUMzNS45IDIuMzggMzAuNDcgMCAyNCAwIDExLjA0IDAgMSAxMS4wNSAxIDI0YzAgMTIuOTUgMTAuMDQgMjQgMjMgMjQgNi40NyAwIDEyLjMzLTIuMzcgMTYuOTQtNi4yOWwtNy4xMi03LjEyYy0yLjYgMi40OS01LjkgNC04LjgyIDQtNy43MyAwLTE0LjA3LTYuMjUtMTQuMDctMTQgMC03Ljc1IDYuMzQtMTQgMTQuMDctMTR6Ii8+PC9zdmc+" alt="Google Icon">
+                    Continue with Google
+                </button>
+            </a>
         </form>
+        <p class="footer-text">
+            Already have an account? <a href="/login">Sign in</a>
+        </p>
     </div>
 
     <script>
         document.getElementById('signupForm').addEventListener('submit', function(event) {
             event.preventDefault();
-
-            // Clear previous validation messages
-            document.getElementById('fullnameValidation').textContent = '';
-            document.getElementById('emailValidation').textContent = '';
-            document.getElementById('phoneValidation').textContent = '';
-            document.getElementById('passwordValidation').textContent = '';
-            document.getElementById('confirmPasswordValidation').textContent = '';
-
-            // Simple validation logic
-            const fullname = document.getElementById('fullname').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const validationFields = {
+                fullname: { min: 3, message: 'Full Name must be at least 3 characters long.' },
+                email: { pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Please enter a valid email address.' },
+                phone: { pattern: /^[0-9]{10}$/, message: 'Please enter a valid 10-digit phone number.' },
+                password: { min: 6, message: 'Password must be at least 6 characters long.' },
+                confirmPassword: { match: 'password', message: 'Passwords do not match.' }
+            };
 
             let isValid = true;
+            const form = this;
 
-            if (fullname.length < 3) {
-                document.getElementById('fullnameValidation').textContent = 'Full Name must be at least 3 characters long.';
-                isValid = false;
-            }
+            // Reset validation messages
+            Object.keys(validationFields).forEach(field => {
+                const validationDiv = document.getElementById(`${field}Validation`);
+                validationDiv.style.display = 'none';
+                const input = document.getElementById(field);
+                input.style.borderColor = '#e1e1e1';
+            });
 
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email)) {
-                document.getElementById('emailValidation').textContent = 'Please enter a valid email address.';
-                isValid = false;
-            }
+            // Validate each field
+            Object.keys(validationFields).forEach(field => {
+                const input = document.getElementById(field);
+                const validation = validationFields[field];
+                const validationDiv = document.getElementById(`${field}Validation`);
+                let fieldValid = true;
 
-            const phonePattern = /^[0-9]{10}$/;
-            if (!phonePattern.test(phone)) {
-                document.getElementById('phoneValidation').textContent = 'Please enter a valid 10-digit phone number.';
-                isValid = false;
-            }
+                if (validation.min && input.value.length < validation.min) {
+                    fieldValid = false;
+                } else if (validation.pattern && !validation.pattern.test(input.value)) {
+                    fieldValid = false;
+                } else if (validation.match && input.value !== document.getElementById(validation.match).value) {
+                    fieldValid = false;
+                }
 
-            if (password.length < 6) {
-                document.getElementById('passwordValidation').textContent = 'Password must be at least 6 characters long.';
-                isValid = false;
-            }
+                if (!fieldValid) {
+                    isValid = false;
+                    validationDiv.textContent = validation.message;
+                    validationDiv.style.display = 'block';
+                    input.style.borderColor = '#dc3545';
+                    input.parentElement.classList.add('shake');
+                    setTimeout(() => input.parentElement.classList.remove('shake'), 300);
+                }
+            });
 
-            if (password !== confirmPassword) {
-                document.getElementById('confirmPasswordValidation').textContent = 'Passwords do not match.';
-                isValid = false;
-            }
-
-            if (isValid) {
-                this.submit();
+            if (!isValid) {
+                form.classList.add('shake');
+                setTimeout(() => form.classList.remove('shake'), 300);
+            } else {
+                form.submit();
             }
         });
     </script>

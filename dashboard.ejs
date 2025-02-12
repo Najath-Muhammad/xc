@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(to bottom, #4facfe, #00f2fe);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 15px 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+
+        .card-custom-small {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card-custom-small:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .card-gradient-blue-small {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+        }
+
+        .card-gradient-warning-small {
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            color: #fff;
+        }
+
+        .card-gradient-success-small {
+            background: linear-gradient(135deg, #89f7fe, #66a6ff);
+            color: #fff;
+        }
+
+        .card-gradient-danger-small {
+            background: linear-gradient(135deg, #ff758c, #ff7eb3);
+            color: #fff;
+        }
+
+        .dashboard-card {
+            border-radius: 8px;
+            padding: 1rem;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+
+        .card-icon-small {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .list-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: .5rem;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="/admin/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="/admin/users"><i class="fas fa-users"></i> Users</a></li>
+            <li><a href="/admin/orders"><i class="fas fa-shopping-cart"></i> Orders</a></li>
+            <li><a href="/admin/products"><i class="fas fa-box"></i> Products</a></li>
+            <li><a href="/admin/category"><i class="fas fa-tags"></i> Categories</a></li>
+            <li><a href="/admin/brands"><i class="fas fa-crown"></i> Brands</a></li>
+            <li><a href="/admin/offers"><i class="fas fa-gift"></i> Offers</a></li>
+            <li><a href="/admin/coupons"><i class="fas fa-ticket-alt"></i> Coupons</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <button class="logout-btn" onclick="window.location.href='/admin/logout';"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        
+        <div class="container-fluid">
+            <h2 class="mb-4">Dashboard Overview</h2>
+
+            <!-- Summary Cards -->
+            <div class="row row-small">
+                <div class="col-md-4 col-sm-6 mb-4">
+                    <div class="card card-custom-small card-gradient-blue-small">
+                        <div class="card-body text-center p-3">
+                            <div class="card-icon-small">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <h5 class="card-title-small">Total Sales</h5>
+                            <p class="card-text-small"><%= totalSales %></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-6 mb-4">
+                    <div class="card card-custom-small card-gradient-warning-small">
+                        <div class="card-body text-center p-3">
+                            <div class="card-icon-small">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <h5 class="card-title-small">Total Orders</h5>
+                            <p class="card-text-small"><%= totalOrders %> Orders</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Charts and Reports -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="dashboard-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>Sales Chart</h4>
+                            <select id="chartFilter" class="form-control w-auto">
+                                <option value="yearly">Yearly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                            </select>
+                        </div>
+                        <canvas id="salesChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="dashboard-card">
+                        <div class="list-title">Top Selling Products</div>
+                        <ul class="list-group">
+                            <% mostSoldProduct.forEach((product, index) => { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <%= index + 1 %>. <%= product.productDetails.productName %>
+                                    <span class="badge bg-primary rounded-pill"><%= product.count %></span>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories and Brands -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="dashboard-card">
+                        <div class="list-title">Top Categories</div>
+                        <ul class="list-group">
+                            <% bestSellingCategory.forEach((category, index) => { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <%= index + 1 %>. <%= category.categoryDetails.name %>
+                                    <span class="badge bg-success rounded-pill"><%= category.count %></span>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="dashboard-card">
+                        <div class="list-title">Top Brands</div>
+                        <ul class="list-group">
+                            <% bestSellingBrand.forEach((brand, index) => { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <%= index + 1 %>. <%= brand.brandName %>
+                                    <span class="badge bg-danger rounded-pill"><%= brand.count %></span>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Add this at the start of your script
+function debugLog(message, data) {
+    console.log(`[Chart Debug] ${message}:`, data);
+}
+
+// Create default data for initial render
+const defaultData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    datasets: [{
+        label: 'Sales',
+        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4
+    }]
+};
+
+debugLog('Chart initialization started', { canvasElement: !!document.getElementById('salesChart') });
+
+// Initialize chart with default data
+const ctx = document.getElementById('salesChart');
+if (!ctx) {
+    console.error('Failed to find canvas element with id "salesChart"');
+    return;
+}
+
+let salesChart = new Chart(ctx, {
+    type: 'line',
+    data: defaultData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+            duration: 750,
+            easing: 'easeInOutQuart'
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            },
+            tooltip: {
+                enabled: true,
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        if (context.parsed.y !== null) {
+                            label += new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: 'USD'
+                            }).format(context.parsed.y);
+                        }
+                        return label;
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                display: true,
+                grid: {
+                    display: false
+                }
+            },
+            y: {
+                display: true,
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0,
+                        }).format(value);
+                    }
+                }
+            }
+        }
+    }
+});
+
+debugLog('Chart initialized', { chart: !!salesChart });
+
+// Improved fetch function with error handling and debugging
+async function fetchChartData(filterType) {
+    debugLog('Fetching data started', { filterType });
+    
+    try {
+        const response = await fetch(`/admin/sales-data?filterType=${filterType}`);
+        debugLog('Fetch response received', { 
+            status: response.status,
+            ok: response.ok 
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        debugLog('Data parsed successfully', { 
+            hasLabels: !!result.labels,
+            hasData: !!result.data,
+            dataLength: result.data?.length
+        });
+
+        // Validate the data structure
+        if (!result.labels || !result.data) {
+            throw new Error('Invalid data structure received from server');
+        }
+
+        return {
+            labels: result.labels,
+            data: result.data
+        };
+    } catch (error) {
+        console.error('Error in fetchChartData:', error);
+        // Show error message on the chart
+        displayChartError(error.message);
+        return {
+            labels: defaultData.labels,
+            data: defaultData.datasets[0].data
+        };
+    }
+}
+
+// Function to display error message on chart
+function displayChartError(message) {
+    const container = document.querySelector('.dashboard-card');
+    if (container) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger mt-2';
+        errorDiv.textContent = `Error loading chart data: ${message}`;
+        container.appendChild(errorDiv);
+    }
+}
+
+// Enhanced update function
+async function updateChart(filterType) {
+    debugLog('Update started', { filterType });
+    
+    try {
+        // Show loading state
+        if (salesChart) {
+            salesChart.data.datasets[0].data = Array(12).fill(0);
+            salesChart.update('none');
+        }
+
+        const chartData = await fetchChartData(filterType);
+        debugLog('Update data received', { 
+            labels: chartData.labels,
+            dataPoints: chartData.data.length 
+        });
+
+        if (salesChart) {
+            salesChart.data.labels = chartData.labels;
+            salesChart.data.datasets[0].data = chartData.data;
+            salesChart.update();
+            debugLog('Chart updated successfully', {
+                newDataPoints: chartData.data.length
+            });
+        }
+    } catch (error) {
+        console.error('Error in updateChart:', error);
+        displayChartError(error.message);
+    }
+}
+
+// Initialize with event listener for DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    debugLog('DOM loaded, initializing chart');
+    updateChart('yearly');
+});
+
+// Add event listener for filter changes
+const filterSelect = document.getElementById('chartFilter');
+if (filterSelect) {
+    filterSelect.addEventListener('change', (e) => {
+        debugLog('Filter changed', { newValue: e.target.value });
+        updateChart(e.target.value);
+    });
+}
+    </script>
+</body>
+</html>

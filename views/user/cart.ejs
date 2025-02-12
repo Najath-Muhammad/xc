@@ -1,0 +1,486 @@
+<%- include('../../views/partials/user/header') %>
+<style>
+    .product__cart__item__pic img {
+        width: 90px;  
+        height: 90px; 
+        object-fit: cover;
+        object-position: center;
+    }
+    .quantity {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .quantity .pro-qty-2 {
+        display: flex;
+        align-items: center;
+    }
+    .quantity button {
+        width: 30px;
+        height: 30px;
+        background-color: #f5f5f5;
+        border: 1px solid #ddd;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+    .quantity button:hover {
+        background-color: #e0e0e0;
+    }
+    .quantity .quantity-input {
+        width: 50px;
+        height: 30px;
+        text-align: center;
+        border: 1px solid #ddd;
+        margin: 0 5px;
+    }
+    .quantity .stock-error {
+        color: red;
+        font-size: 0.8em;
+        margin-left: 10px;
+        display: block;
+        margin-top: 5px;
+    }
+    .quantity .stock-error {
+    color: red;
+    font-size: 0.8em;
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 5px;
+    padding-left: 30px; /* Adjust this value to align with the quantity input */
+}
+.available-coupons {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 15px;
+}
+
+.coupon-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.coupon-item.invalid {
+    opacity: 0.7;
+    background-color: #f5f5f5;
+}
+
+.coupon-details h5 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.coupon-details p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.expiry {
+    font-size: 0.8em;
+    color: #999;
+}
+
+.apply-coupon {
+    background-color: #111111;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.apply-coupon:hover {
+    background-color: #333;
+}
+
+.coupon-status {
+    color: #999;
+    font-size: 0.9em;
+    margin: 0;
+}
+
+.applied-coupon-details {
+    background-color: #e8f5e9;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.remove-coupon {
+    background-color: #ff5252;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.remove-coupon:hover {
+    background-color: #ff1744;
+}
+</style>
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>Shopping Cart</h4>
+                    <div class="breadcrumb__links">
+                        <a href="/">Home</a>
+                        <a href="/shop">Shop</a>
+                        <span>Shopping Cart</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<!-- Shopping Cart Section Begin -->
+<section class="shopping-cart spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="shopping__cart__table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (cart && cart.items.length > 0) { %>
+                                <% cart.items.forEach(item => { %>
+                                    <tr data-item-id="<%= item._id %>">
+                                        <td class="product__cart__item">
+                                            <div class="product__cart__item__pic">
+                                                <img src="/uploads/re-image/<%=item.productId.productImage[0]%>" alt="<%= item.productId.productName %>">
+                                            </div>
+                                            <div class="product__cart__item__text">
+                                                <h6><%= item.productId.productName %></h6>
+                                                <h5>₹<%= item.price %></h5>
+                                            </div>
+                                        </td>
+                                        <td class="quantity__item">
+                                            <div class="quantity">
+                                                <div class="pro-qty-2">
+                                                    <input type="text" 
+                                                           value="<%= item.quantity %>" 
+                                                           data-max-quantity="<%= Math.min(item.productId.quantity, 10) %>"
+                                                           class="quantity-input">
+                                                </div>
+                                                <span class="stock-error text-danger" style="display: none;"></span>
+                                            </div>
+                                        </td>
+                                        <td class="cart__price">₹<%= item.totalPrice %></td>
+                                        <td class="cart__close">
+                                            <i class="fa fa-close" data-item-id="<%= item._id %>"></i>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4">No items in the cart.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <div class="continue__btn">
+                            <a href="/">Continue Shopping</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <!-- <div class="continue__btn update__btn">
+                            <a href="#"><i class="fa fa-spinner"></i> Update cart</a>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="cart__discount">
+                    <h6>Available Coupons</h6>
+                    <% if (coupons && coupons.length > 0) { %>
+                        <div class="available-coupons">
+                            <% coupons.forEach(coupon => { %>
+                                <% 
+                                    const isExpired = new Date(coupon.expireOn) < new Date();
+                                    const canUse = !isExpired && 
+                                                coupon.isActive && 
+                                                cart.items.reduce((acc, item) => acc + item.totalPrice, 0) >= coupon.minimumPrice &&
+                                                (typeof user === 'string' ? !coupon.userId.includes(user) : true);
+                                    const alreadyUsed = typeof user === 'string' && coupon.userId.includes(user);
+                                %>
+                                <div class="coupon-item <%= canUse ? 'valid' : 'invalid' %>"
+                                     data-coupon-name="<%= coupon.name %>"
+                                     data-offer-price="<%= coupon.offerPrice %>"
+                                     data-min-price="<%= coupon.minimumPrice %>">
+                                    <div class="coupon-details">
+                                        <h5><%= coupon.name %></h5>
+                                        <p>₹<%= coupon.offerPrice %> off on minimum purchase of ₹<%= coupon.minimumPrice %></p>
+                                        <p class="expiry">Valid till: <%= new Date(coupon.expireOn).toLocaleDateString() %></p>
+                                    </div>
+                                    <% if (canUse && !alreadyUsed) { %>
+                                        <button class="apply-coupon">Apply</button>
+                                    <% } else { %>
+                                        <p class="coupon-status">
+                                            <%= isExpired ? 'Expired' : 
+                                               !coupon.isActive ? 'Inactive' :
+                                               cart.items.reduce((acc, item) => acc + item.totalPrice, 0) < coupon.minimumPrice ? 'Cart value too low' :
+                                               alreadyUsed ? 'Already used' : 'Not applicable' %>
+                                        </p>
+                                    <% } %>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <p>No coupons available at the moment.</p>
+                    <% } %>
+                    <div id="appliedCoupon" style="display: none;">
+                        <div class="applied-coupon-details">
+                            <span class="coupon-name"></span>
+                            <span class="discount-amount"></span>
+                            <button class="remove-coupon">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="cart__total">
+                    <h6>Cart total</h6>
+                    <ul>
+                        <li>Subtotal <span>₹<%= cart.items.reduce((acc, item) => acc + item.totalPrice, 0).toFixed(2) %></span></li>
+                        <li>Total <span>₹ <%= cart.items.reduce((acc, item) => acc + item.totalPrice, 0).toFixed(2) %></span></li>
+                    </ul>
+                    <a href="/checkout" class="primary-btn">Proceed to checkout</a>
+                </div>
+        </div>
+    </div>
+</section>
+<!-- Shopping Cart Section End -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Item removal logic (unchanged)
+    document.querySelectorAll('.cart__close i').forEach(function(closeIcon) {
+        closeIcon.addEventListener('click', function() {
+            var itemId = this.getAttribute('data-item-id');
+            fetch('/cart/removeItem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ itemId: itemId })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      document.querySelector(`tr[data-item-id="${itemId}"]`).remove();
+                      updateCartTotal();
+                      
+                      // Check if cart is empty after removal
+                      if (document.querySelectorAll('.shopping__cart__table tbody tr').length === 0) {
+                          document.querySelector('.shopping__cart__table tbody').innerHTML = 
+                              '<tr><td colspan="4">No items in the cart.</td></tr>';
+                      }
+                  } else {
+                      alert('Failed to remove item from cart');
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert('Error removing item from cart');
+              });
+        });
+    });
+
+    // Quantity validation logic (unchanged)
+    const quantityInputs = document.querySelectorAll('.quantity-input');
+    
+    quantityInputs.forEach(input => {
+        const container = input.closest('.quantity');
+        const errorSpan = container.querySelector('.stock-error');
+        const maxQuantity = parseInt(input.getAttribute('data-max-quantity'));
+        const pricePerUnit = parseFloat(input.closest('tr').querySelector('.product__cart__item__text h5').textContent.replace('₹', ''));
+        const totalPriceCell = input.closest('tr').querySelector('.cart__price');
+
+        const validateAndUpdateQuantity = () => {
+            let currentQuantity = parseInt(input.value) || 0;
+
+            // Clear previous error messages
+            errorSpan.style.display = 'none';
+            errorSpan.textContent = '';
+
+            // Validate quantity against max stock and limit of 10
+            if (currentQuantity > 10) {
+                currentQuantity = 10;
+                input.value = 10;
+                errorSpan.textContent = 'Maximum quantity is 10';
+                errorSpan.style.display = 'block';
+            } else if (currentQuantity > maxQuantity) {
+                currentQuantity = maxQuantity;
+                input.value = maxQuantity;
+                errorSpan.textContent = `Only ${maxQuantity} items available in stock`;
+                errorSpan.style.display = 'block';
+            } else if (currentQuantity < 1) {
+                currentQuantity = 1;
+                input.value = 1;
+            }
+
+            // Update total price for the item
+            const totalPrice = (currentQuantity * pricePerUnit).toFixed(2);
+            totalPriceCell.textContent = `₹ ${totalPrice}`;
+
+            // Send update to server
+            fetch('/cart/updateItem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    itemId: input.closest('tr').getAttribute('data-item-id'),
+                    quantity: currentQuantity 
+                })
+            }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCartTotal();
+                }
+            })
+            .catch(error => {
+                console.error('Error updating quantity:', error);
+            });
+        };
+
+        // Direct input validation
+        input.addEventListener('input', function() {
+            // Remove non-numeric characters
+            this.value = this.value.replace(/[^0-9]/g, '');
+            validateAndUpdateQuantity();
+        });
+
+        // Increment/decrement buttons
+        const increaseBtn = document.createElement('button');
+        increaseBtn.textContent = '+';
+        increaseBtn.type = 'button';
+        increaseBtn.addEventListener('click', () => {
+            let currentValue = parseInt(input.value) || 0;
+            input.value = Math.min(currentValue + 1, 10);
+            validateAndUpdateQuantity();
+        });
+
+        const decreaseBtn = document.createElement('button');
+        decreaseBtn.textContent = '-';
+        decreaseBtn.type = 'button';
+        decreaseBtn.addEventListener('click', () => {
+            let currentValue = parseInt(input.value) || 0;
+            input.value = Math.max(currentValue - 1, 1);
+            validateAndUpdateQuantity();
+        });
+
+        // Insert buttons dynamically if not already present
+        input.parentNode.insertBefore(decreaseBtn, input);
+        input.parentNode.insertBefore(increaseBtn, input.nextSibling);
+    });
+
+    // Function to update cart total
+    function updateCartTotal() {
+        const cartTotalElement = document.querySelector('.cart__total ul li:last-child span');
+        const totalPrice = Array.from(document.querySelectorAll('.cart__price'))
+            .reduce((total, priceEl) => {
+                return total + parseFloat(priceEl.textContent.replace('₹', '').trim());
+            }, 0);
+        
+        cartTotalElement.textContent = `₹ ${totalPrice.toFixed(2)}`;
+    }
+
+    // Coupon application logic
+    const applyCouponButtons = document.querySelectorAll('.apply-coupon');
+    const appliedCouponSection = document.getElementById('appliedCoupon');
+    const couponNameDisplay = appliedCouponSection.querySelector('.coupon-name');
+    const discountAmountDisplay = appliedCouponSection.querySelector('.discount-amount');
+    const removeCouponButton = appliedCouponSection.querySelector('.remove-coupon');
+    let appliedCoupon = null;
+
+    applyCouponButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const couponItem = this.closest('.coupon-item');
+            const couponName = couponItem.getAttribute('data-coupon-name');
+            const offerPrice = parseFloat(couponItem.getAttribute('data-offer-price'));
+            const minPrice = parseFloat(couponItem.getAttribute('data-min-price'));
+
+            const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
+
+            if (subtotal >= minPrice) {
+                appliedCoupon = {
+                    name: couponName,
+                    discount: offerPrice
+                };
+
+                // Update UI
+                couponNameDisplay.textContent = couponName;
+                discountAmountDisplay.textContent = `-₹ ${offerPrice.toFixed(2)}`;
+                appliedCouponSection.style.display = 'block';
+
+                // Update total price
+                const totalPriceElement = document.querySelector('.cart__total ul li:last-child span');
+                const totalPrice = subtotal - offerPrice;
+                totalPriceElement.textContent = `₹ ${totalPrice.toFixed(2)}`;
+            } else {
+                alert('Cart value is too low to apply this coupon.');
+            }
+        });
+    });
+
+    // Remove coupon logic
+    removeCouponButton.addEventListener('click', function() {
+        appliedCoupon = null;
+        appliedCouponSection.style.display = 'none';
+
+        // Revert total price to subtotal
+        const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
+        const totalPriceElement = document.querySelector('.cart__total ul li:last-child span');
+        totalPriceElement.textContent = `₹ ${subtotal.toFixed(2)}`;
+    });
+
+    // Proceed to checkout logic
+    const checkoutButton = document.querySelector('.primary-btn');
+    checkoutButton.addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent default navigation
+
+        const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
+        let totalPrice = subtotal;
+
+        if (appliedCoupon) {
+            totalPrice -= appliedCoupon.discount;
+        }
+
+        // Add coupon data and total price to the checkout URL
+        const checkoutUrl = new URL('/checkout', window.location.origin);
+        if (appliedCoupon) {
+            checkoutUrl.searchParams.set('coupon', appliedCoupon.name);
+            checkoutUrl.searchParams.set('discount', appliedCoupon.discount.toFixed(2));
+        }
+        checkoutUrl.searchParams.set('totalPrice', totalPrice.toFixed(2));
+        window.location.href = checkoutUrl.toString();
+    });
+});
+</script>
+<%- include('../../views/partials/user/footer') %>

@@ -23,6 +23,7 @@ async (accessToken, refreshToken, profile, done) => {
             await newUser.save();
             return done(null, newUser);
         }
+        // console.log(newUser)
     } catch (error) {
         return done(error, null);
     }

@@ -1,0 +1,442 @@
+<%- include('../../views/partials/user/header') %>
+<style>
+    .address-block {
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        position: relative;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+
+    .address-block:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .address-block input[type="radio"] {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+
+    .address-block.selected {
+        border: 2px solid #3399cc;
+        background-color: #f8f9fa;
+    }
+
+    .address-details {
+        padding-right: 40px;
+    }
+
+    .address-details p {
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .address-type-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .address-actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .no-address-block {
+        text-align: center;
+        padding: 40px 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .no-address-block i {
+        font-size: 48px;
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+
+    .btn-address {
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-add-address {
+        background: #3399cc;
+        color: white;
+    }
+
+    .btn-update-address {
+        background: #6c757d;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .address-block {
+            padding: 15px;
+        }
+        
+        .address-block input[type="radio"] {
+            top: 15px;
+            right: 15px;
+        }
+    }
+    
+</style>
+<!-- Add Razorpay Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>Check Out</h4>
+                    <div class="breadcrumb__links">
+                        <a href="/">Home</a>
+                        <a href="/shop">Shop</a>
+                        <span>Check Out</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<!-- Checkout Section Begin -->
+<section class="checkout spad">
+    <div class="container">
+        <div class="checkout__form">
+            <form action="/placeOrder" method="POST" id="checkout-form">
+                <div class="row">
+                    <div class="col-lg-8 col-md-6">
+                        <h6 class="coupon__code"><span class="icon_tag_alt"></span> Have a coupon? <a href="#">Click here</a> to enter your code</h6>
+                        <h6 class="checkout__title">Billing Details</h6>
+                        <div class="checkout__address">
+                            <% if (addresses && addresses.length > 0) { %>
+                                <div class="address-selection">
+                                    <% addresses.forEach((addressDoc, index) => { %>
+                                        <% if (addressDoc.address && addressDoc.address.length > 0) { %>
+                                            <% addressDoc.address.forEach((address, addrIndex) => { %>
+                                                <div class="address-block" data-address-id="address<%= index %>_<%= addrIndex %>">
+                                                    <input 
+                                                        type="radio" 
+                                                        id="address<%= index %>_<%= addrIndex %>" 
+                                                        name="selectedAddress" 
+                                                        value="<%= addressDoc._id %>_<%= addrIndex %>" 
+                                                        <%= index === 0 && addrIndex === 0 ? 'checked' : '' %>>
+                                                    <div class="address-details">
+                                                        <span class="address-type-badge"><%= address.addressType %></span>
+                                                        <p>
+                                                            <strong><%= address.name %></strong><br>
+                                                            <%= address.streetAddress %><br>
+                                                            <% if (address.landMark) { %>
+                                                                <%= address.landMark %><br>
+                                                            <% } %>
+                                                            <%= address.city %>, <%= address.state %> - <%= address.pincode %><br>
+                                                            Phone: <%= address.phone %>
+                                                            <% if (address.altPhone) { %>
+                                                                , <%= address.altPhone %>
+                                                            <% } %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            <% }); %>
+                                        <% } %>
+                                    <% }); %>
+                                </div>
+                                <div class="address-actions">
+                                    <a href="/profile" class="btn-address btn-add-address">Add New Address</a>
+                                </div>
+                            <% } else { %>
+                                <div class="no-address-block">
+                                    <i class="fa fa-home"></i>
+                                    <h5>No Delivery Address Found</h5>
+                                    <p>Please add a delivery address to continue with checkout</p>
+                                    <a href="/profile" class="btn-address btn-add-address">Add New Address</a>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="checkout__order">
+                            <h4 class="order__title">Your order</h4>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% let subtotal = 0; %>
+                                    <% cart.items.forEach(item => { %>
+                                        <% subtotal += item.totalPrice; %>
+                                        <tr>
+                                            <td><%= item.productId.productName %></td>
+                                            <td><%= item.quantity %></td>
+                                            <td>₹<%= item.totalPrice.toFixed(2) %></td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="2">Subtotal</th>
+                                        <th>₹<%= subtotal.toFixed(2) %></th>
+                                    </tr>
+                                    <!-- Simplified total with included tax -->
+                                    <% const tax = subtotal * 0.10; %>
+                                    <!-- Add Delivery Fee -->
+                                    <% const deliveryFee = 40; %>
+                                    <tr>
+                                        <th colspan="2">Delivery Fee</th>
+                                        <th>₹<%= deliveryFee.toFixed(2) %></th>
+                                    </tr>
+                                    <!-- Calculate Final Total -->
+                                    <% let finalTotal = subtotal + tax + deliveryFee; %>
+                                    <% if (typeof discount !== 'undefined' && discount > 0) { %>
+                                        <tr>
+                                            <th colspan="2">Discount</th>
+                                            <th>-₹<%= discount.toFixed(2) %></th>
+                                        </tr>
+                                        <% finalTotal -= discount; %>
+                                    <% } %>
+                                    <tr>
+                                        <th colspan="2">Total (Including all taxes)</th>
+                                        <th>₹<%= finalTotal.toFixed(2) %></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div class="checkout__payment">
+                            <h4 class="order__title">Payment Method</h4>
+                            <% if (finalTotal <= 1000) { %>
+                                <div class="checkout__input__checkbox">
+                                    <label for="payment-cod">
+                                        Cash on Delivery
+                                        <input type="radio" id="payment-cod" name="paymentMethod" value="cod" checked>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <div class="checkout__input__checkbox">
+                                    <label for="payment-razorpay">
+                                        Razor Pay
+                                        <input type="radio" id="payment-razorpay" name="paymentMethod" value="razorpay" checked>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                            <% } else { %>
+                                <div class="alert alert-info">
+                                    For orders above ₹1,000, only online payment is available.
+                                </div>
+                                <div class="checkout__input__checkbox">
+                                    <label for="payment-razorpay">
+                                        Razor Pay
+                                        <input type="radio" id="payment-razorpay" name="paymentMethod" value="razorpay" checked>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                            <% } %>
+                        </div>
+                        <!-- Hidden inputs for order processing -->
+                        <input type="hidden" id="finalAmount" name="finalAmount" value="<%= finalTotal.toFixed(2) %>">
+                        <input type="hidden" id="coupon" name="coupon" value="<%= coupon || '' %>">
+                        <input type="hidden" id="orderId" name="orderId" value="">
+                        <input type="hidden" id="paymentId" name="paymentId" value="">
+                        <input type="hidden" id="signature" name="signature" value="">
+                        <button type="button" class="site-btn" id="placeOrderBtn">PLACE ORDER</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<!-- Checkout Section End -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkoutForm = document.getElementById('checkout-form');
+        const placeOrderBtn = document.getElementById('placeOrderBtn');
+        const finalAmountInput = document.getElementById('finalAmount');
+        const couponInput = document.getElementById('coupon');
+    
+        placeOrderBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+            if (!selectedAddress) {
+                Swal.fire({
+                    title: 'Address Required',
+                    text: 'Please select a delivery address to continue',
+                    icon: 'warning',
+                    confirmButtonColor: '#3399cc',
+                    confirmButtonText: 'Okay'
+                });
+                return;
+            }
+    
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const total = parseFloat(finalAmountInput.value);
+    
+            const initialPaymentStatus = paymentMethod === 'cod' ? 'Pending' : 'Pending';
+
+            const formData = {
+                selectedAddress: selectedAddress.value,
+                paymentMethod: paymentMethod,
+                paymentStatus: initialPaymentStatus,
+                orderNotes: '', 
+                finalAmount: total,
+                coupon: couponInput.value
+            };
+
+            const paymentStatusInput = document.createElement('input');
+            paymentStatusInput.type = 'hidden';
+            paymentStatusInput.name = 'paymentStatus';
+            paymentStatusInput.value = initialPaymentStatus;
+       
+            checkoutForm.appendChild(paymentStatusInput);
+    
+            if (paymentMethod === 'razorpay') {
+                try {
+                    const response = await fetch('/createOrder', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            amount: total , 
+                            currency: 'INR',
+                            paymentStatus: initialPaymentStatus
+                        })
+                    });
+    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+    
+                    const orderData = await response.json();
+                    console.log('Order creation response:', orderData);
+                    
+                    if (!orderData.success) {
+                        throw new Error(orderData.message || 'Failed to create order');
+                    }
+    
+                    const options = {
+                        key: '<%= process.env.RAZORPAY_KEY_ID %>',
+                        amount: orderData.amount,
+                        currency: 'INR',
+                        name: 'Your Store Name',
+                        description: 'Purchase Description',
+                        order_id: orderData.orderId,
+                        handler: async function(response) {
+                            try {
+                                console.log('Payment success response:', response);
+
+                                paymentStatusInput.value = 'Completed';
+
+                                const verifyResponse = await fetch('/verifyPayment', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                    ...response,
+                                    paymentStatus: 'Completed'
+                                })
+                                });
+
+                                if (!verifyResponse.ok) {
+                                    throw new Error(`HTTP error! status: ${verifyResponse.status}`);
+                                }
+
+                                const verifyData = await verifyResponse.json();
+                                console.log('Verification response:', verifyData);
+
+                                if (verifyData.success) {
+
+                                    await fetch('/updatePaymentStatus', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            orderId: orderId,
+                                            paymentId: response.razorpay_payment_id
+                                        })
+                                    });
+
+                                    
+                                    checkoutForm.submit();
+                                } else {
+                                    throw new Error(verifyData.message || 'Payment verification failed');
+                                }
+                            } catch (handlerError) {
+                                console.error('Payment handler error:', handlerError);
+                                paymentStatusInput.value = 'Failed';
+                                alert(`Payment verification failed: ${handlerError.message}`);
+                            }
+                        },
+                        prefill: {
+                            name: '<%= user.name %>',
+                            email: '<%= user.email %>',
+                            contact: '<%= user.phone %>'
+                        },
+                        theme: {
+                            color: '#3399cc'
+                        },
+                        modal: {
+                            ondismiss: async function() {
+                                console.warn('Payment was canceled or failed');
+                                paymentStatusInput.value = 'Failed';
+
+                                await fetch(`/updateOrderStatus/${orderData.dbOrderId}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ 
+                                        paymentStatus: 'Failed',
+                                        status: 'Pending' 
+                                    })
+                                });
+                    
+                                await Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Payment Failed',
+                                    text: 'Payment failed or was canceled. Your order has been placed as "Pending". You can pay later.',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                });
+                
+                checkoutForm.submit();
+            }
+                        }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+
+    
+                } catch (error) {
+                    console.error('Payment initialization failed:', error);
+                    alert(`Payment failed: ${error.message}`);
+                }
+            } else {
+                checkoutForm.submit();
+            }
+        });
+    });
+</script>
+
+<%- include('../../views/partials/user/footer') %>
