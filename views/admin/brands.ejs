@@ -1,110 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brands Management</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
-    }
-
-    .sidebar {
-      width: 250px;
-      height: 100vh;
-      background: linear-gradient(to bottom, #4facfe, #00f2fe);
-      color: white;
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding: 20px;
-    }
-
-    .sidebar h2 {
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 24px;
-    }
-
-    .sidebar ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .sidebar ul li {
-      margin: 15px 0;
-    }
-
-    .sidebar ul li a {
-      color: white;
-      text-decoration: none;
-      font-size: 18px;
-      display: block;
-      transition: all 0.3s ease;
-    }
-
-    .sidebar ul li a:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 5px;
-      padding: 10px;
-    }
-
-    .main-content {
-      margin-left: 270px;
-      padding: 20px;
-    }
-
-    .logout-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .logout-btn:hover {
-      background-color: #c0392b;
-    }
-  </style>
-</head>
-<body>
-  <div class="sidebar">
-    <h2>Admin Panel</h2>
-    <ul>
-      <li><a href="/admin/dashboard">Dashboard</a></li>
-      <li><a href="/admin/users">User</a></li>
-      <li><a href="/admin/orders">Order</a></li>
-      <li><a href="/admin/addProducts">Add Products</a></li>
-      <li><a href="/admin/products">Products</a></li>
-      <li><a href="/admin/brands">Brands</a></li>
-      <li><a href="/admin/category">Category</a></li>
-      <li><a href="/admin/offers">Offers</a></li>
-      <li><a href="/admin/coupons">Coupons</a></li>
-    </ul>
-  </div>
-
-  <div class="main-content">
-    <button class="logout-btn" onclick="window.location.href='/admin/logout';">Logout</button>
+<%- include('../../views/partials/admin/header') %>
+ <div class="main-content">
     <div class="container mt-5">
-      <h2 class="mb-4">Brands</h2>
 
       <!-- Add Brand Section -->
       <div class="card p-4 mb-4">
-        <form id="brandForm" action="/admin/addBrand" method="POST" enctype="multipart/form-data">
+        <form id="brandForm" action="/admin/addBrand" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
           <div class="mb-3">
             <label for="brandName" class="form-label">Brand Name</label>
-            <input type="text" class="form-control" id="brandName" name="brandName" placeholder="Type here" required>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="brandName" 
+              name="brandName" 
+              placeholder="Type here" 
+              pattern="^[A-Za-z0-9\s]{2,30}$"
+              required>
+            <div class="invalid-feedback">
+              Please enter a valid brand name (2-30 characters, letters and numbers only)
+            </div>
           </div>
           <div class="mb-3">
             <label for="brandImage" class="form-label">Brand Image</label>
-            <input type="file" class="form-control" id="brandImage" name="image" required>
+            <input type="file" class="form-control" id="brandImage" name="image" accept="image/*">
+            <div class="invalid-feedback">
+              Please select a valid image file
+            </div>
           </div>
           <button type="submit" class="btn btn-success">Add Brand</button>
         </form>
@@ -145,9 +65,9 @@
                       <a href="/admin/unBlockBrand?id=<%= brand._id %>" class="text-white">Unblock</a>
                     </button>
                   <% } %>
-                  <button class="btn btn-danger btn-sm" onclick="return confirmDelete()">
-                    <a href="/admin/deleteBrand?id=<%= brand._id %>" class="text-white">Delete</a>
-                  </button>
+                  <button class="btn btn-danger btn-sm delete-brand" data-id="<%= brand._id %>">
+                    <a href="#" class="text-white">Delete</a>
+                </button>
                 </td>
                 
             </tr>
@@ -174,10 +94,61 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script>
-    function confirmDelete() {
-        return confirm("Are you sure you want to delete this brand?");
-    }
-  </script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const brandForm = document.getElementById('brandForm');
+    const brandNameInput = document.getElementById('brandName');
+
+    brandNameInput.addEventListener('input', function() {
+        const value = this.value;
+        const pattern = /^[A-Za-z0-9\s]{2,30}$/;
+        
+        if (!pattern.test(value)) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else {
+            this.classList.add('is-valid');
+            this.classList.remove('is-invalid');
+        }
+    });
+
+    brandForm.addEventListener('submit', function(e) {
+        const brandName = brandNameInput.value;
+        const pattern = /^[A-Za-z0-9\s]{2,30}$/;
+
+        if (!pattern.test(brandName)) {
+            e.preventDefault();
+            brandNameInput.classList.add('is-invalid');
+            brandNameInput.focus();
+        }
+    });
+});
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteButtons = document.querySelectorAll('.delete-brand');
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const brandId = this.getAttribute('data-id');
+                
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = `/admin/deleteBrand?id=${brandId}`;
+                    }
+                });
+            });
+        });
+    });
+    </script>
 </body>
 </html>

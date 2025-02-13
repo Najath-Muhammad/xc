@@ -1,10 +1,5 @@
-<%- include('../../views/partials/admin/header') %> 
-    <style>
-        .main-content {
-            margin-left: 260px;
-            padding: 20px;
-        }
-
+<%- include('../../views/partials/admin/header') %>
+<style>
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -66,6 +61,11 @@
             color: #fff;
         }
 
+        .btn-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
         .btn-sm {
             font-size: 14px;
         }
@@ -79,28 +79,8 @@
             margin-bottom: 20px;
         }
 
-        #error-container ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-
         .category-list {
             margin-top: 40px;
-        }
-
-        .offer-input {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .offer-input input {
-            flex-grow: 1;
-        }
-
-        .table-actions {
-            display: flex;
-            gap: 10px;
         }
 
         table {
@@ -129,6 +109,7 @@
             background-color: #dc3545;
             color: white;
         }
+
         .form-select {
             padding: 8px;
             border: 1px solid #ddd;
@@ -136,26 +117,21 @@
             margin-right: 10px;
             min-width: 200px;
         }
-        .btn-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #c82333;
-            border-color: #bd2130;
-        }
 
         .ms-2 {
             margin-left: 0.5rem;
         }
+
+        .table-actions {
+            display: flex;
+            gap: 10px;
+        }
     </style>
+
 
     <div class="main-content">
         <div class="container">
-            <h1>Category Management</h1>
-            <!-- Category Form -->
+            
             <div class="form-group">
                 <label for="name">Category Name</label>
                 <input type="text" id="name" name="name" placeholder="Enter category name" required>
@@ -188,12 +164,8 @@
                                 <tr>
                                     <td><strong><%= category.name %></strong></td>
                                     <td><%= category.description %></td>
-                                    <td>
-                                        <% if (category.isListed) { %>
-                                            <span>Listed</span>
-                                        <% } else { %>
-                                            <span>Unlisted</span>
-                                        <% } %>
+                                    <td id="status-<%= category._id %>">
+                                        <%= category.isListed ? 'Listed' : 'Unlisted' %>
                                     </td>
                                     <td>
                                         <% 
@@ -227,7 +199,15 @@
                                                 <% } %>
                                             <% }) %>
                                         </select>
-                                        <!-- Other buttons remain the same -->
+                                        <button class="btn btn-info btn-sm">
+                                            <a href="/admin/editCategory?id=<%= category._id %>" 
+                                               style="text-decoration: none; color: white;">Edit</a>
+                                        </button>
+                                        <button id="list-unlist-btn-<%= category._id %>" 
+                                                class="btn <%= category.isListed ? 'btn-unlist' : 'btn-list' %>"
+                                                onclick="<%= category.isListed ? 'unlistCategory' : 'listCategory' %>('<%= category._id %>')">
+                                            <%= category.isListed ? 'Unlist' : 'List' %>
+                                        </button>
                                     </td>
                                 </tr>
                             <% }) %>
@@ -250,185 +230,23 @@
         </div>
     </div>
 
-    <script>
-        async function addOffer(categoryId) {
-    const amountInput = document.getElementById(`offer-amount-${categoryId}`);
-    const amount = parseInt(amountInput.value, 10);
 
-    if (isNaN(amount) || amount < 0 || amount > 100) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Invalid Offer Amount',
-            text: 'Please enter a valid percentage between 0 and 100.',
-        });
-        return;
-    }
+<script>
+    async function submitCategory() {
+        const name = document.getElementById("name").value;
+        const description = document.getElementById("description").value;
+        const errors = [];
 
-    try {
-        const response = await fetch('/admin/addCategoryOffer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ percentage: amount, categoryId })
-        });
-
-        const data = await response.json();
-
-        if (data.status) {
-            const offerCell = document.getElementById(`offer-cell-${categoryId}`);
-            if (offerCell) {
-                offerCell.innerHTML = `${amount}% Offer 
-                    <button class="btn btn-warning btn-sm ml-2" onclick="removeOffer('${categoryId}')">Remove Offer</button>`;
-            }
-            Swal.fire({
-                icon: 'success',
-                title: 'Offer added successfully!',
-                timer: 1500
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error adding offer',
-                text: data.message || 'Something went wrong.'
-            });
+        if (!name || !description) {
+            errors.push('All fields are required.');
         }
-    } catch (error) {
-        console.error('Error adding offer:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error adding offer',
-            text: 'An unexpected error occurred.'
-        });
-    }
-}
 
-async function removeOffer(categoryId) {
-    try {
-        const response = await fetch('/admin/removeCategoryOffer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ categoryId })
-        });
-
-        const data = await response.json();
-        
-        if (data.status) {
-            const offerCell = document.getElementById(`offer-cell-${categoryId}`);
-            if (offerCell) {
-                offerCell.innerHTML = `
-                    <div class="offer-input">
-                        <input type="number" id="offer-amount-${categoryId}" 
-                               placeholder="% Off" min="0" max="100">
-                        <button class="btn btn-success btn-sm" 
-                                onclick="addOffer('${categoryId}')">
-                            Add Offer
-                        </button>
-                    </div>
-                `;
-            }
-            Swal.fire({
-                icon: 'success', 
-                title: 'Offer removed successfully!', 
-                timer: 1500
-            });
-        } else {
-            Swal.fire({
-                icon: 'error', 
-                title: 'Error removing offer', 
-                text: data.message
-            });
+        if (errors.length) {
+            displayErrors(errors);
+            return;
         }
-    } catch (error) {
-        console.error('Error removing offer:', error);
-        Swal.fire({
-            icon: 'error', 
-            title: 'Error removing offer', 
-            text: 'An unexpected error occurred.'
-        });
-    }
-}
 
-async function listCategory(categoryId) {
-    try {
-        const response = await fetch(`/admin/category/${categoryId}/list`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: categoryId })
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            updateCategoryStatus(categoryId, true);
-            window.location.reload('/category')
-        } else {
-            Swal.fire({ 
-                icon: 'error', 
-                title: 'Error listing category', 
-                text: data.message 
-            });
-        }
-    } catch (error) {
-        console.error('Error listing category:', error);
-    }
-}
-
-async function unlistCategory(categoryId) {
-    try {
-        const response = await fetch(`/admin/category/${categoryId}/unlist`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: categoryId })
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            updateCategoryStatus(categoryId, false);
-            window.location.reload('/category')
-        } else {
-            Swal.fire({ 
-                icon: 'error', 
-                title: 'Error unlisting category', 
-                text: data.message 
-            });
-        }
-    } catch (error) {
-        console.error('Error unlisting category:', error);
-    }
-}
-
-function updateCategoryStatus(categoryId, isListed) {
-    const statusCell = document.getElementById(`status-${categoryId}`);
-    const actionButton = document.getElementById(`list-unlist-btn-${categoryId}`);
-
-    if (statusCell && actionButton) {
-        if (isListed) {
-            statusCell.textContent = 'Listed';
-            actionButton.textContent = 'Unlist';
-            actionButton.classList.remove('btn-list');
-            actionButton.classList.add('btn-unlist');
-            actionButton.setAttribute('onclick', `unlistCategory('${categoryId}')`);
-        } else {
-            statusCell.textContent = 'Unlisted';
-            actionButton.textContent = 'List';
-            actionButton.classList.remove('btn-unlist');
-            actionButton.classList.add('btn-list');
-            actionButton.setAttribute('onclick', `listCategory('${categoryId}')`);
-        }
-    }
-}
-async function submitCategory() {
-            const name = document.getElementById("name").value;
-            const description = document.getElementById("description").value;
-            const errors = [];
-
-            if (!name || !description) {
-                errors.push('All fields are required.');
-            }
-
-            if (errors.length) {
-                displayErrors(errors);
-                return;
-            }
-
+        try {
             const response = await fetch('/admin/addCategory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -452,78 +270,180 @@ async function submitCategory() {
                     text: data.message || 'Something went wrong.'
                 });
             }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred.'
+            });
         }
-        async function applyOffer(categoryId, offerId) {
-            if (!offerId) return;
+    }
 
-            try {
-                const response = await fetch('/admin/applyCategoryOffer', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categoryId, offerId })
+    function displayErrors(errors) {
+        const errorContainer = document.getElementById('error-container');
+        const errorList = errorContainer.querySelector('ul');
+        errorList.innerHTML = '';
+        errors.forEach(error => {
+            const li = document.createElement('li');
+            li.textContent = error;
+            errorList.appendChild(li);
+        });
+        errorContainer.style.display = 'block';
+    }
+
+    async function applyOffer(categoryId, offerId) {
+        if (!offerId) return;
+
+        try {
+            const response = await fetch('/admin/applyCategoryOffer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ categoryId, offerId })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Offer applied successfully!',
+                    timer: 1500
+                }).then(() => {
+                    window.location.reload();
                 });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Offer applied successfully!',
-                        timer: 1500
-                    }).then(() => {
-                        window.location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error applying offer',
-                        text: data.message || 'Something went wrong.'
-                    });
-                }
-            } catch (error) {
-                console.error('Error applying offer:', error);
+            } else {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: 'An unexpected error occurred.'
+                    title: 'Error applying offer',
+                    text: data.message || 'Something went wrong.'
                 });
             }
+        } catch (error) {
+            console.error('Error applying offer:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred.'
+            });
         }
-        async function removeOffer(categoryId, offerId) {
-            try {
-                const response = await fetch('/admin/removeCategoryOffer', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categoryId, offerId })
+    }
+
+    async function removeOffer(categoryId, offerId) {
+        try {
+            const response = await fetch('/admin/removeCategoryOffer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ categoryId, offerId })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Offer removed successfully!',
+                    timer: 1500
+                }).then(() => {
+                    window.location.reload();
                 });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Offer removed successfully!',
-                        timer: 1500
-                    }).then(() => {
-                        window.location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error removing offer',
-                        text: data.message || 'Something went wrong.'
-                    });
-                }
-            } catch (error) {
-                console.error('Error removing offer:', error);
+            } else {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: 'An unexpected error occurred.'
+                    title: 'Error removing offer',
+                    text: data.message || 'Something went wrong.'
                 });
             }
+        } catch (error) {
+            console.error('Error removing offer:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred.'
+            });
         }
-    </script>
+    }
+
+    async function listCategory(categoryId) {
+        try {
+            const response = await fetch(`/admin/category/${categoryId}/list`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: categoryId })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                updateCategoryStatus(categoryId, true);
+                window.location.reload();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error listing category',
+                    text: data.message
+                });
+            }
+        } catch (error) {
+            console.error('Error listing category:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred.'
+            });
+        }
+    }
+
+    async function unlistCategory(categoryId) {
+        try {
+            const response = await fetch(`/admin/category/${categoryId}/unlist`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: categoryId })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                updateCategoryStatus(categoryId, false);
+                window.location.reload();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error unlisting category',
+                    text: data.message
+                });
+            }
+        } catch (error) {
+            console.error('Error unlisting category:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred.'
+            });
+        }
+    }
+
+    function updateCategoryStatus(categoryId, isListed) {
+        const statusCell = document.getElementById(`status-${categoryId}`);
+        const actionButton = document.getElementById(`list-unlist-btn-${categoryId}`);
+
+        if (statusCell && actionButton) {
+            if (isListed) {
+                statusCell.textContent = 'Listed';
+                actionButton.textContent = 'Unlist';
+                actionButton.classList.remove('btn-list');
+                actionButton.classList.add('btn-unlist');
+                actionButton.setAttribute('onclick', `unlistCategory('${categoryId}')`);
+            } else {
+                statusCell.textContent = 'Unlisted';
+                actionButton.textContent = 'List';
+                actionButton.classList.remove('btn-unlist');
+                actionButton.classList.add('btn-list');
+                actionButton.setAttribute('onclick', `listCategory('${categoryId}')`);
+            }
+        }
+    }
+</script>
+
 </body>
 
 </html>
