@@ -98,7 +98,7 @@
                                 <th>Items</th>
                                 <th>Amount</th>
                                 <th>Status</th>
-                                <th>Return Details</th>
+                                <th>Return/Cancel Details</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -135,6 +135,9 @@
                                     <% if (order.returnReason) { %>
                                         <%= order.returnReason %>
                                     <% } %>
+                                    <%if(order.cancelReason){%>
+                                        <%=order.cancelReason%>
+                                    <%}%>
                                 </td>
                                 <td>
                                     <% if (order.status !== 'Cancelled' && order.status !== 'Returned' && order.status !== 'Completed') { %>

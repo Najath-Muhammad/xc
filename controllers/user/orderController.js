@@ -212,7 +212,13 @@ const generateInvoice = (order, res) => {
     let rowY = tableY + 25;
     doc.fontSize(11).font('Helvetica');
 
+    // Calculate subtotal while rendering items
+    let subtotal = 0;
     order.orderedItems.forEach((item, index) => {
+        // Calculate item total if not already calculated
+        const itemTotal = item.totalPrice || (item.price * item.quantity);
+        subtotal += itemTotal;
+
         // Alternating row color
         if (index % 2 === 0) {
             doc.fillColor('#f5f5f5').rect(startX, rowY, 500, 20).fill();
@@ -224,13 +230,18 @@ const generateInvoice = (order, res) => {
         doc.text(item.size, startX + columnWidths[0] + columnWidths[1] + 5, rowY + 5);
         doc.text(item.quantity.toString(), startX + columnWidths[0] + columnWidths[1] + columnWidths[2] + 5, rowY + 5);
         doc.text(`₹${item.price}`, startX + columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3] + 5, rowY + 5);
-        doc.text(`₹${item.totalPrice}`, startX + columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3] + columnWidths[4] + 5, rowY + 5);
+        doc.text(`₹${itemTotal}`, startX + columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3] + columnWidths[4] + 5, rowY + 5);
         rowY += 20;
     });
 
     doc.moveTo(startX, rowY).lineTo(550, rowY).stroke(); // Bottom border
 
     // ---------- ORDER SUMMARY ----------
+    // Calculate tax and final amount if not provided
+    const discount = order.discount || 0;
+    const tax = order.tax || (subtotal * 0.05); // 5% tax if not provided
+    const finalAmount = order.finalAmount || (subtotal + tax - discount);
+
     rowY += 15;
     doc.fillColor('#222').fontSize(12).font('Helvetica-Bold');
     doc.text('Subtotal:', 400, rowY);
@@ -239,10 +250,10 @@ const generateInvoice = (order, res) => {
     doc.text('Total Amount:', 400, rowY + 60);
     
     doc.fillColor('#000').fontSize(12).font('Helvetica');
-    doc.text(`₹${order.finalAmount - order.tax}`, 480, rowY);
-    doc.text(`₹${order.tax}`, 480, rowY + 20);
-    doc.text(`₹${order.discount}`, 480, rowY + 40);
-    doc.fontSize(14).font('Helvetica-Bold').text(`₹${order.finalAmount}`, 480, rowY + 60);
+    doc.text(`₹${subtotal.toFixed(2)}`, 480, rowY);
+    doc.text(`₹${tax.toFixed(2)}`, 480, rowY + 20);
+    doc.text(`₹${discount.toFixed(2)}`, 480, rowY + 40);
+    doc.fontSize(14).font('Helvetica-Bold').text(`₹${finalAmount.toFixed(2)}`, 480, rowY + 60);
 
     doc.moveDown(2);
 
@@ -254,7 +265,7 @@ const generateInvoice = (order, res) => {
 
     if (order.paymentMethod === 'COD') {
         doc.moveDown(1);
-        doc.fillColor('red').font('Helvetica-Bold').text('Cash on Delivery - Please have the exact amount ready.', 50); //⚠️
+        doc.fillColor('red').font('Helvetica-Bold').text('Cash on Delivery - Please have the exact amount ready.', 50);
         doc.fillColor('#000');
     }
 
@@ -273,20 +284,19 @@ const generateInvoice = (order, res) => {
     doc.end();
 };
 
-const downloadInvoice  = async (req, res)=>{
+const downloadInvoice = async (req, res) => {
     try {
-        console.log('body',req.params.orderId)
+        console.log('body', req.params.orderId);
         const order = await Order.findOne({ orderId: req.params.orderId }).populate('userId orderedItems.product userId.addressId');
-        console.log('order',order)
+        console.log('order', order);
         if (!order) return res.status(404).json({ error: 'Order not found' });
-
 
         generateInvoice(order, res);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-}
+};
 
 const updatePaymentStatus = async (req, res) => {
     try {

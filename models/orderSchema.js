@@ -72,6 +72,10 @@ const orderSchema = new Schema({
         type: Boolean,
         default: false
     },
+    cancelReason:{
+        type:String,
+        defualt:''
+    },
     returnReason: {
         type: String,
         default: ''

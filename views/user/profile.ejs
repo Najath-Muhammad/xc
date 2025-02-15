@@ -562,7 +562,7 @@
                                         </td>
                                         <td>
                                             <% if (order.status === 'Pending' || order.status === 'Processing') { %>
-                                                <form method="post" action="/cancelOrder" style="display:inline;">
+                                                <form method="post" action="/cancelOrderReason" style="display:inline;">
                                                     <input type="hidden" name="orderId" value="<%= order.orderId %>">
                                                     <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
                                                 </form>

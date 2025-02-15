@@ -89,8 +89,8 @@ const getProductAddPage = async (req,res) => {
 const addProducts = async (req, res) => {
     try {
         const products = req.body;
-        console.log('Received product data:', products);
-        console.log('Received files:', req.files);
+        // console.log('Received product data:', products);
+        // console.log('Received files:', req.files);
 
         const productExist = await Product.findOne({ productName: products.productName });
         if (productExist) {
@@ -122,6 +122,7 @@ const addProducts = async (req, res) => {
         }
 
         const category = await Category.findById(products.category);
+        const brand =  await Brand.findById(products.brand)
         if (!category) {
             return res.status(400).json({ message: 'Invalid category' });
         }
@@ -129,7 +130,7 @@ const addProducts = async (req, res) => {
         const newProduct = new Product({
             productName: products.productName,
             description: products.description,
-            brand: products.brand,
+            brand: brand.brandName,
             category: products.category,
             regularPrice: Number(products.regularPrice),
             salePrice: Number(products.salePrice) || null,
@@ -247,10 +248,10 @@ const editProducts = async (req, res) => {
     try {
       const id = req.params.id;
       const data = req.body;
+      console.log('data',data)
 
       
-  
-      const existingProduct = await Product.findOne({
+        const existingProduct = await Product.findOne({
         productName: data.productName,
         _id: { $ne: id },
       });

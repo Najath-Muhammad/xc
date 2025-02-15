@@ -25,7 +25,7 @@ const assignReferralCodes = async () => {
         console.error('Error assigning referral codes:', error);
     } finally {
         mongoose.connection.close();
-    }
+    }  
 };
 
 assignReferralCodes();

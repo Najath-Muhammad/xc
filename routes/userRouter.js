@@ -54,6 +54,7 @@ router.post('/addresses', profileController.addAddress);
 router.post('/deleteAddress', profileController.deleteAddress);
 router.post('/editAddress', profileController.editAddress);
 router.get('/profile/:orderId', orderController.loadOrderDetails)
+router.post('/cancelOrderReason',profileController.cancelOrderReason)
 router.post('/cancelOrder',profileController.cancelOrder)
 router.post('/createOrder', orderController.createOrder);
 router.post('/returnRequestget',profileController.returnRequestget)

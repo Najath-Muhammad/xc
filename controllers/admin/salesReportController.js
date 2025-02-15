@@ -145,7 +145,6 @@ const exportSalesReport = async (req, res) => {
         const { type, reportType, startDate, endDate } = req.query;
         const dateRange = getDateRange(reportType, startDate, endDate);
 
-        
         const orders = await Order.find({
             createdOn: {
                 $gte: dateRange.start,
@@ -153,13 +152,17 @@ const exportSalesReport = async (req, res) => {
             },
             status: { $nin: ['cancelled'] }
         }).populate('userId', 'name email');
-        console.log('orders:',orders)
+        console.log('orders:', orders);
 
-        
         const totals = {
             totalSales: orders.reduce((sum, order) => sum + (order.finalAmount || 0), 0),
             totalDiscount: orders.reduce((sum, order) => sum + (order.discount || 0), 0),
-            totalOrders: orders.length
+            totalOrders: orders.length,
+            // Add payment method summary
+            paymentMethods: orders.reduce((acc, order) => {
+                acc[order.paymentMethod] = (acc[order.paymentMethod] || 0) + 1;
+                return acc;
+            }, {})
         };
 
         if (type === 'excel') {
@@ -177,31 +180,37 @@ const exportSalesReport = async (req, res) => {
 };
 
 const generateExcelReport = async (orders, totals, dateRange, res) => {
-    console.log('data',orders)
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Sales Report');
 
-    
-    worksheet.mergeCells('A1:G1');
+    // Title
+    worksheet.mergeCells('A1:H1');
     worksheet.getCell('A1').value = 'Sales Report';
     worksheet.getCell('A1').font = { size: 16, bold: true };
     worksheet.getCell('A1').alignment = { horizontal: 'center' };
 
-    
-    worksheet.mergeCells('A2:G2');
+    // Date Range
+    worksheet.mergeCells('A2:H2');
     worksheet.getCell('A2').value = `Period: ${dateRange.start.toLocaleDateString()} to ${dateRange.end.toLocaleDateString()}`;
     worksheet.getCell('A2').alignment = { horizontal: 'center' };
 
-    
+    // Summary
     worksheet.addRow(['']);
     worksheet.addRow(['Summary']);
     worksheet.addRow(['Total Orders', totals.totalOrders]);
     worksheet.addRow(['Total Sales', formatCurrency(totals.totalSales)]);
     worksheet.addRow(['Total Discount', formatCurrency(totals.totalDiscount)]);
     worksheet.addRow(['Net Amount', formatCurrency(totals.totalSales - totals.totalDiscount)]);
+
+    // Payment Methods Summary
+    worksheet.addRow(['']);
+    worksheet.addRow(['Payment Methods']);
+    Object.entries(totals.paymentMethods).forEach(([method, count]) => {
+        worksheet.addRow([method, count]);
+    });
     worksheet.addRow(['']);
 
-    
+    // Headers
     worksheet.addRow([
         'Order ID',
         'Date',
@@ -209,18 +218,20 @@ const generateExcelReport = async (orders, totals, dateRange, res) => {
         'Amount',
         'Discount',
         'Final Amount',
+        'Payment Method',
         'Status'
     ]);
 
-    
-    worksheet.getRow(8).font = { bold: true };
-    worksheet.getRow(8).fill = {
+    // Style headers
+    const headerRow = worksheet.lastRow;
+    headerRow.font = { bold: true };
+    headerRow.fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FFE0E0E0' }
     };
 
-    
+    // Data rows
     orders.forEach(order => {
         worksheet.addRow([
             order.orderId,
@@ -229,17 +240,18 @@ const generateExcelReport = async (orders, totals, dateRange, res) => {
             order.totalPrice,
             order.discount,
             order.finalAmount,
+            order.paymentMethod,
             order.status
         ]);
     });
 
-    
+    // Column formatting
     worksheet.columns.forEach(column => {
         column.width = 15;
         column.alignment = { horizontal: 'left' };
     });
 
-    
+    // Headers
     res.setHeader(
         'Content-Type',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -249,32 +261,29 @@ const generateExcelReport = async (orders, totals, dateRange, res) => {
         'attachment; filename=sales-report.xlsx'
     );
 
-    
     await workbook.xlsx.write(res);
 };
 
 const generatePDFReport = async (orders, totals, dateRange, res) => {
     const doc = new PDFDocument({ margin: 30, size: 'A4' });
 
-    
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename=sales-report.pdf');
 
-    
     doc.pipe(res);
 
-    
+    // Title
     doc.fontSize(20).text('Sales Report', { align: 'center' });
     doc.moveDown();
 
-    
+    // Date Range
     doc.fontSize(12).text(
         `Period: ${dateRange.start.toLocaleDateString()} to ${dateRange.end.toLocaleDateString()}`,
         { align: 'center' }
     );
     doc.moveDown();
 
-    
+    // Summary Table
     const summaryTable = {
         headers: ['Metric', 'Value'],
         rows: [
@@ -292,15 +301,35 @@ const generatePDFReport = async (orders, totals, dateRange, res) => {
     
     doc.moveDown();
 
+    // Payment Methods Summary
+    doc.fontSize(12).text('Payment Methods Summary', { underline: true });
+    doc.moveDown(0.5);
     
+    const paymentMethodsTable = {
+        headers: ['Payment Method', 'Count'],
+        rows: Object.entries(totals.paymentMethods).map(([method, count]) => [
+            method,
+            count.toString()
+        ])
+    };
+
+    await doc.table(paymentMethodsTable, {
+        prepareHeader: () => doc.font('Helvetica-Bold'),
+        prepareRow: () => doc.font('Helvetica')
+    });
+    
+    doc.moveDown();
+
+    // Orders Table
     const ordersTable = {
-        headers: ['Order ID', 'Date', 'Amount', 'Discount', 'Final', 'Status'],
+        headers: ['Order ID', 'Date', 'Amount', 'Discount', 'Final', 'Payment', 'Status'],
         rows: orders.map(order => [
             order.orderId,
             new Date(order.createdOn).toLocaleDateString(),
             formatCurrency(order.totalPrice),
             formatCurrency(order.discount),
             formatCurrency(order.finalAmount),
+            order.paymentMethod,
             order.status
         ])
     };
@@ -310,16 +339,16 @@ const generatePDFReport = async (orders, totals, dateRange, res) => {
         prepareRow: () => doc.font('Helvetica').fontSize(10)
     });
 
-    
     doc.end();
 };
+
 const getSalesData = async (req, res) => {
     try {
         const { filterType } = req.query;
         const currentDate = new Date();
         let startDate;
 
-        // Set date range based on filter type
+
         switch (filterType) {
             case 'yearly':
                 startDate = new Date(currentDate);

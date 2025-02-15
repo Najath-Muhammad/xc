@@ -9,7 +9,7 @@ const loadProductsPage = async (req, res) => {
         console.log('userId:',userId)
 
         const user = await User.findById(userId)
-        // console.log('userId:',userId)
+        
 
         const products = await Product.find({
             isBlocked: false,

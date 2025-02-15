@@ -119,6 +119,13 @@
     justify-content: space-between;
     align-items: center;
 }
+.stock-error {
+    color: red;
+    font-size: 0.8em;
+    display: none;
+    margin-top: 5px;
+    font-weight: bold;
+}
 
 .remove-coupon {
     background-color: #ff5252;
@@ -281,206 +288,238 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    // Item removal logic (unchanged)
-    document.querySelectorAll('.cart__close i').forEach(function(closeIcon) {
-        closeIcon.addEventListener('click', function() {
-            var itemId = this.getAttribute('data-item-id');
-            fetch('/cart/removeItem', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ itemId: itemId })
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.success) {
-                      document.querySelector(`tr[data-item-id="${itemId}"]`).remove();
-                      updateCartTotal();
-                      
-                      // Check if cart is empty after removal
-                      if (document.querySelectorAll('.shopping__cart__table tbody tr').length === 0) {
-                          document.querySelector('.shopping__cart__table tbody').innerHTML = 
-                              '<tr><td colspan="4">No items in the cart.</td></tr>';
+        // Item removal logic (unchanged)
+        document.querySelectorAll('.cart__close i').forEach(function(closeIcon) {
+            closeIcon.addEventListener('click', function() {
+                var itemId = this.getAttribute('data-item-id');
+                fetch('/cart/removeItem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ itemId: itemId })
+                }).then(response => response.json())
+                  .then(data => {
+                      if (data.success) {
+                          document.querySelector(`tr[data-item-id="${itemId}"]`).remove();
+                          updateCartTotal();
+                          updateAvailableCoupons();
+                          
+                          // Check if cart is empty after removal
+                          if (document.querySelectorAll('.shopping__cart__table tbody tr').length === 0) {
+                              document.querySelector('.shopping__cart__table tbody').innerHTML = 
+                                  '<tr><td colspan="4">No items in the cart.</td></tr>';
+                          }
+                      } else {
+                          alert('Failed to remove item from cart');
                       }
-                  } else {
-                      alert('Failed to remove item from cart');
-                  }
-              })
-              .catch(error => {
-                  console.error('Error:', error);
-                  alert('Error removing item from cart');
-              });
-        });
-    });
-
-    // Quantity validation logic (unchanged)
-    const quantityInputs = document.querySelectorAll('.quantity-input');
-    
-    quantityInputs.forEach(input => {
-        const container = input.closest('.quantity');
-        const errorSpan = container.querySelector('.stock-error');
-        const maxQuantity = parseInt(input.getAttribute('data-max-quantity'));
-        const pricePerUnit = parseFloat(input.closest('tr').querySelector('.product__cart__item__text h5').textContent.replace('₹', ''));
-        const totalPriceCell = input.closest('tr').querySelector('.cart__price');
-
-        const validateAndUpdateQuantity = () => {
-            let currentQuantity = parseInt(input.value) || 0;
-
-            // Clear previous error messages
-            errorSpan.style.display = 'none';
-            errorSpan.textContent = '';
-
-            // Validate quantity against max stock and limit of 10
-            if (currentQuantity > 10) {
-                currentQuantity = 10;
-                input.value = 10;
-                errorSpan.textContent = 'Maximum quantity is 10';
-                errorSpan.style.display = 'block';
-            } else if (currentQuantity > maxQuantity) {
-                currentQuantity = maxQuantity;
-                input.value = maxQuantity;
-                errorSpan.textContent = `Only ${maxQuantity} items available in stock`;
-                errorSpan.style.display = 'block';
-            } else if (currentQuantity < 1) {
-                currentQuantity = 1;
-                input.value = 1;
-            }
-
-            // Update total price for the item
-            const totalPrice = (currentQuantity * pricePerUnit).toFixed(2);
-            totalPriceCell.textContent = `₹ ${totalPrice}`;
-
-            // Send update to server
-            fetch('/cart/updateItem', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    itemId: input.closest('tr').getAttribute('data-item-id'),
-                    quantity: currentQuantity 
-                })
-            }).then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateCartTotal();
-                }
-            })
-            .catch(error => {
-                console.error('Error updating quantity:', error);
+                  })
+                  .catch(error => {
+                      console.error('Error:', error);
+                      alert('Error removing item from cart');
+                  });
             });
-        };
-
-        // Direct input validation
-        input.addEventListener('input', function() {
-            // Remove non-numeric characters
-            this.value = this.value.replace(/[^0-9]/g, '');
-            validateAndUpdateQuantity();
         });
-
-        // Increment/decrement buttons
-        const increaseBtn = document.createElement('button');
-        increaseBtn.textContent = '+';
-        increaseBtn.type = 'button';
-        increaseBtn.addEventListener('click', () => {
-            let currentValue = parseInt(input.value) || 0;
-            input.value = Math.min(currentValue + 1, 10);
-            validateAndUpdateQuantity();
-        });
-
-        const decreaseBtn = document.createElement('button');
-        decreaseBtn.textContent = '-';
-        decreaseBtn.type = 'button';
-        decreaseBtn.addEventListener('click', () => {
-            let currentValue = parseInt(input.value) || 0;
-            input.value = Math.max(currentValue - 1, 1);
-            validateAndUpdateQuantity();
-        });
-
-        // Insert buttons dynamically if not already present
-        input.parentNode.insertBefore(decreaseBtn, input);
-        input.parentNode.insertBefore(increaseBtn, input.nextSibling);
-    });
-
-    // Function to update cart total
-    function updateCartTotal() {
-        const cartTotalElement = document.querySelector('.cart__total ul li:last-child span');
-        const totalPrice = Array.from(document.querySelectorAll('.cart__price'))
-            .reduce((total, priceEl) => {
-                return total + parseFloat(priceEl.textContent.replace('₹', '').trim());
-            }, 0);
+    
+        // Quantity validation logic (unchanged)
+        const quantityInputs = document.querySelectorAll('.quantity-input');
         
-        cartTotalElement.textContent = `₹ ${totalPrice.toFixed(2)}`;
-    }
+        quantityInputs.forEach(input => {
+            const container = input.closest('.quantity');
+            const errorSpan = container.querySelector('.stock-error');
+            const maxQuantity = parseInt(input.getAttribute('data-max-quantity'));
+            const pricePerUnit = parseFloat(input.closest('tr').querySelector('.product__cart__item__text h5').textContent.replace('₹', ''));
+            const totalPriceCell = input.closest('tr').querySelector('.cart__price');
+    
+            const validateAndUpdateQuantity = () => {
+                let currentQuantity = parseInt(input.value) || 0;
 
-    // Coupon application logic
-    const applyCouponButtons = document.querySelectorAll('.apply-coupon');
-    const appliedCouponSection = document.getElementById('appliedCoupon');
-    const couponNameDisplay = appliedCouponSection.querySelector('.coupon-name');
-    const discountAmountDisplay = appliedCouponSection.querySelector('.discount-amount');
-    const removeCouponButton = appliedCouponSection.querySelector('.remove-coupon');
-    let appliedCoupon = null;
+                errorSpan.style.display = 'none';
+                errorSpan.textContent = '';
 
-    applyCouponButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const couponItem = this.closest('.coupon-item');
-            const couponName = couponItem.getAttribute('data-coupon-name');
-            const offerPrice = parseFloat(couponItem.getAttribute('data-offer-price'));
-            const minPrice = parseFloat(couponItem.getAttribute('data-min-price'));
+                if (currentQuantity > 10) {
+                    currentQuantity = 10;
+                    input.value = 10;
+                    errorSpan.textContent = 'Maximum quantity is 10';
+                    errorSpan.style.display = 'block';
+                } else if (currentQuantity > maxQuantity) {
+                    currentQuantity = maxQuantity;
+                    input.value = maxQuantity;
+                    errorSpan.textContent = `Only ${maxQuantity} items available in stock`;
+                    errorSpan.style.display = 'block';
+                } else if (currentQuantity < 1) {
+                    currentQuantity = 1;
+                    input.value = 1;
+                }
 
-            const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
+                if (currentQuantity === 10) {
+                    errorSpan.textContent = 'Maximum quantity is 10';
+                    errorSpan.style.display = 'block';
+                }
 
-            if (subtotal >= minPrice) {
-                appliedCoupon = {
-                    name: couponName,
-                    discount: offerPrice
-                };
+                const totalPrice = (currentQuantity * pricePerUnit).toFixed(2);
+                totalPriceCell.textContent = `₹ ${totalPrice}`;
 
-                // Update UI
-                couponNameDisplay.textContent = couponName;
-                discountAmountDisplay.textContent = `-₹ ${offerPrice.toFixed(2)}`;
-                appliedCouponSection.style.display = 'block';
-
-                // Update total price
-                const totalPriceElement = document.querySelector('.cart__total ul li:last-child span');
-                const totalPrice = subtotal - offerPrice;
-                totalPriceElement.textContent = `₹ ${totalPrice.toFixed(2)}`;
-            } else {
-                alert('Cart value is too low to apply this coupon.');
-            }
+                fetch('/cart/updateItem', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        itemId: input.closest('tr').getAttribute('data-item-id'),
+                        quantity: currentQuantity 
+                    })
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateCartTotal();
+                        updateAvailableCoupons(); // Call this to refresh coupons
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating quantity:', error);
+                });
+            };
+                
+            // Direct input validation
+            input.addEventListener('input', function() {
+                // Remove non-numeric characters
+                this.value = this.value.replace(/[^0-9]/g, '');
+                validateAndUpdateQuantity();
+            });
+    
+            // Increment/decrement buttons
+            const increaseBtn = document.createElement('button');
+            increaseBtn.textContent = '+';
+            increaseBtn.type = 'button';
+            increaseBtn.addEventListener('click', () => {
+                let currentValue = parseInt(input.value) || 0;
+                input.value = Math.min(currentValue + 1, 10);
+                validateAndUpdateQuantity();
+            });
+    
+            const decreaseBtn = document.createElement('button');
+            decreaseBtn.textContent = '-';
+            decreaseBtn.type = 'button';
+            decreaseBtn.addEventListener('click', () => {
+                let currentValue = parseInt(input.value) || 0;
+                input.value = Math.max(currentValue - 1, 1);
+                validateAndUpdateQuantity();
+            });
+    
+            // Insert buttons dynamically if not already present
+            input.parentNode.insertBefore(decreaseBtn, input);
+            input.parentNode.insertBefore(increaseBtn, input.nextSibling);
         });
-    });
+    
+        // Function to update cart total
+        function updateCartTotal() {
+            const cartTotalElement = document.querySelector('.cart__total ul li:last-child span');
+            const totalPrice = Array.from(document.querySelectorAll('.cart__price'))
+                .reduce((total, priceEl) => {
+                    return total + parseFloat(priceEl.textContent.replace('₹', '').trim());
+                }, 0);
 
-    // Remove coupon logic
-    removeCouponButton.addEventListener('click', function() {
-        appliedCoupon = null;
-        appliedCouponSection.style.display = 'none';
-
-        // Revert total price to subtotal
-        const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
-        const totalPriceElement = document.querySelector('.cart__total ul li:last-child span');
-        totalPriceElement.textContent = `₹ ${subtotal.toFixed(2)}`;
-    });
-
-    // Proceed to checkout logic
-    const checkoutButton = document.querySelector('.primary-btn');
-    checkoutButton.addEventListener('click', function(e) {
-        e.preventDefault(); // Prevent default navigation
-
-        const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
-        let totalPrice = subtotal;
-
-        if (appliedCoupon) {
-            totalPrice -= appliedCoupon.discount;
+            cartTotalElement.textContent = `₹ ${totalPrice.toFixed(2)}`;
         }
+    
+        // Function to update available coupons
+        function updateAvailableCoupons() {
+            const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
+            const couponItems = document.querySelectorAll('.coupon-item');
 
-        // Add coupon data and total price to the checkout URL
-        const checkoutUrl = new URL('/checkout', window.location.origin);
-        if (appliedCoupon) {
-            checkoutUrl.searchParams.set('coupon', appliedCoupon.name);
-            checkoutUrl.searchParams.set('discount', appliedCoupon.discount.toFixed(2));
+            couponItems.forEach(couponItem => {
+                const minPrice = parseFloat(couponItem.getAttribute('data-min-price'));
+                const canUse = subtotal >= minPrice;
+                const couponStatus = couponItem.querySelector('.coupon-status');
+                const applyCouponButton = couponItem.querySelector('.apply-coupon');
+
+                if (canUse) {
+                    couponItem.classList.remove('invalid');
+                    if (couponStatus) couponStatus.style.display = 'none';
+                    if (applyCouponButton) applyCouponButton.style.display = 'block';
+                } else {
+                    couponItem.classList.add('invalid');
+                    if (couponStatus) {
+                        couponStatus.textContent = 'Cart value too low';
+                        couponStatus.style.display = 'block';
+                    }
+                    if (applyCouponButton) applyCouponButton.style.display = 'none';
+                }
+            });
         }
-        checkoutUrl.searchParams.set('totalPrice', totalPrice.toFixed(2));
-        window.location.href = checkoutUrl.toString();
+    
+        // Coupon application logic
+        const applyCouponButtons = document.querySelectorAll('.apply-coupon');
+        const appliedCouponSection = document.getElementById('appliedCoupon');
+        const couponNameDisplay = appliedCouponSection.querySelector('.coupon-name');
+        const discountAmountDisplay = appliedCouponSection.querySelector('.discount-amount');
+        const removeCouponButton = appliedCouponSection.querySelector('.remove-coupon');
+        let appliedCoupon = null;
+    
+        applyCouponButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const couponItem = this.closest('.coupon-item');
+                const couponName = couponItem.getAttribute('data-coupon-name');
+                const offerPrice = parseFloat(couponItem.getAttribute('data-offer-price'));
+                const minPrice = parseFloat(couponItem.getAttribute('data-min-price'));
+    
+                const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
+    
+                if (subtotal >= minPrice) {
+                    appliedCoupon = {
+                        name: couponName,
+                        discount: offerPrice
+                    };
+    
+                    // Update UI
+                    couponNameDisplay.textContent = couponName;
+                    discountAmountDisplay.textContent = `-₹ ${offerPrice.toFixed(2)}`;
+                    appliedCouponSection.style.display = 'block';
+    
+                    // Update total price
+                    const totalPriceElement = document.querySelector('.cart__total ul li:last-child span');
+                    const totalPrice = subtotal - offerPrice;
+                    totalPriceElement.textContent = `₹ ${totalPrice.toFixed(2)}`;
+                } else {
+                    alert('Cart value is too low to apply this coupon.');
+                }
+            });
+        });
+    
+        // Remove coupon logic
+        removeCouponButton.addEventListener('click', function() {
+            appliedCoupon = null;
+            appliedCouponSection.style.display = 'none';
+    
+            // Revert total price to subtotal
+            const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
+            const totalPriceElement = document.querySelector('.cart__total ul li:last-child span');
+            totalPriceElement.textContent = `₹ ${subtotal.toFixed(2)}`;
+        });
+    
+        // Proceed to checkout logic
+        const checkoutButton = document.querySelector('.primary-btn');
+        checkoutButton.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent default navigation
+    
+            const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
+            let totalPrice = subtotal;
+    
+            if (appliedCoupon) {
+                totalPrice -= appliedCoupon.discount;
+            }
+    
+            // Add coupon data and total price to the checkout URL
+            const checkoutUrl = new URL('/checkout', window.location.origin);
+            if (appliedCoupon) {
+                checkoutUrl.searchParams.set('coupon', appliedCoupon.name);
+                checkoutUrl.searchParams.set('discount', appliedCoupon.discount.toFixed(2));
+            }
+            checkoutUrl.searchParams.set('totalPrice', totalPrice.toFixed(2));
+            window.location.href = checkoutUrl.toString();
+        });
+    
+        // Initial call to update available coupons based on the current cart total
+        updateAvailableCoupons();
     });
-});
-</script>
+    </script>
 <%- include('../../views/partials/user/footer') %>

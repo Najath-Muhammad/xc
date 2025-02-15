@@ -245,18 +245,46 @@ const editAddress = async (req, res) => {
     }
 };
 
+
+const cancelOrderReason = async (req, res) => {
+    try {
+        const orderId = req.body.orderId;
+        const order = await Order.findOne({ orderId: orderId });
+        
+        if (!order) {
+            return res.status(404).render('error', { message: 'Order not found' });
+        }
+
+        res.render('cancelReason', { order });
+    } catch (error) {
+        console.log('Error loading cancellation page:', error);
+        res.status(500).render('error', { message: 'Internal server error' });
+    }
+};
+
+
 const cancelOrder = async (req, res) => {
     try {
         const userId = req.session.user;
-        const orderId = req.body.orderId;
+        const { orderId, _id, cancelReason } = req.body;
+        console.log("body", req.body);
 
-        if (!orderId) {
+        if (!orderId || !_id) {
             return res.status(400).json({
                 success: false,
                 message: 'Order ID is required',
             });
         }
 
+        // Validate MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid order ID format',
+            });
+        }
+
+        // UUID validation for orderId
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         if (!uuidRegex.test(orderId)) {
             return res.status(400).json({
@@ -265,7 +293,8 @@ const cancelOrder = async (req, res) => {
             });
         }
 
-        const findOrder = await Order.findOne({ orderId }); 
+        // Find order using the MongoDB _id
+        const findOrder = await Order.findById(_id);
 
         if (!findOrder) {
             return res.status(404).json({ 
@@ -284,31 +313,33 @@ const cancelOrder = async (req, res) => {
 
         const canceledQuantity = findOrder.orderedItems[0].quantity;
         const productId = findOrder.orderedItems[0].product;
-        console.log('productId', productId);
 
-        await Product.findOneAndUpdate(
-            { _id: productId },
+        // Update product quantity
+        await Product.findByIdAndUpdate(
+            productId,
             { $inc: { quantity: canceledQuantity }},
             { new: true }
         );
 
-        await Order.updateOne(
-            { orderId }, 
+        // Update order status
+        await Order.findByIdAndUpdate(
+            _id,
             { 
                 $set: {
                     status: 'Cancelled',
                     cancelledAt: new Date(),
-                    cancellationReason: 'Cancelled by user',
-                    paymentStatus:"Failed"
+                    cancelReason: cancelReason,
+                    paymentStatus: "Failed"
                 }
             }
         );
 
+        // Handle refund for Razorpay payments
         if (findOrder.paymentMethod === 'razorpay') {
             const refundAmount = findOrder.finalAmount;
 
-            const wallet = await Wallet.findOneAndUpdate(
-                { userId: new mongoose.Types.ObjectId(userId)}, 
+            await Wallet.findOneAndUpdate(
+                { userId: userId }, // Using the session user ID directly
                 {
                     $inc: { balance: refundAmount },
                     $push: {
@@ -318,7 +349,7 @@ const cancelOrder = async (req, res) => {
                             status: "Success",
                             date: new Date(),
                             orderId: orderId,
-                            remarks:"Canceled Order" 
+                            remarks: "Canceled Order" 
                         },
                     },
                 },
@@ -329,8 +360,6 @@ const cancelOrder = async (req, res) => {
                     runValidators: true,
                 }
             );
-
-            console.log('Wallet updated:', wallet);
         }
 
         res.redirect('/profile');
@@ -343,6 +372,8 @@ const cancelOrder = async (req, res) => {
         });
     }
 };
+
+
 const returnRequestget = async (req,res) => {
     try {
         
@@ -450,6 +481,7 @@ module.exports = {
     addAddress,
     deleteAddress,
     editAddress,
+    cancelOrderReason,
     cancelOrder,
     returnRequestget,
     submitReturnRequest
