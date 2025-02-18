@@ -1,31 +1,31 @@
 const express = require('express');
 const app = express();
 const env = require('dotenv').config();
-const session = require('express-session');
+console.log('Env loaded:', process.env.RAZORPAY_KEY_ID ? 'Razorpay key found' : 'Razorpay key missing');
+const session = require('express-session')
 const db = require('./config/db');
 const path = require('path');
-const userRouter = require('./routes/userRouter');
+const userRouter = require('./routes/userRouter')
 const passport = require('./config/passport');
-const adminRouter = require('./routes/adminRouter');
-const MongoStore = require('connect-mongo');
-const setUserInLocals = require('./middlewares/setUserInLocals');
-
-// Initialize database connection
+const adminRouter = require('./routes/adminRouter')
+const MongoStore = require('connect-mongo'); 
+const setUserInLocals = require('./middlewares/setUserInLocals')
+// const nocache = require('nocache');
 db();
 
-// Middleware setup
+// app.use(nocache());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded());
 app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
+    secret:process.env.SESSION_SECRET,
+    resave:false,
+    saveUninitialized:true,
     store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI,
+        mongoUrl: 'mongodb://localhost:27017/yourdb',
         collectionName: 'sessions'
     }),
-    cookie: {
-        secure: false,
+    cookie:{
+        secure:false,
         maxAge: 24 * 3600 * 1000
     }
 }));
@@ -38,22 +38,19 @@ app.use((req, res, next) => {
     next();
 });
 
-// View engine setup
-app.set('view engine', 'ejs');
+app.set('view engine','ejs');
 app.set('views', [
     path.join(__dirname, 'views/user'),
-    path.join(__dirname, 'views/admin')
+    path.join(__dirname, 'views/admin'), 
 ]);
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes setup
-app.use('/', userRouter);
-app.use('/admin', adminRouter);
+app.use('/',userRouter);
+app.use('/admin',adminRouter)
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log('Server started at port ' + PORT);
-});
+app.listen(process.env.PORT,()=>{
+    console.log('server started at port '+process.env.PORT)
+})
 
-module.exports = app;
+
+module.exports = app

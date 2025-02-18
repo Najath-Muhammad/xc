@@ -9,9 +9,6 @@ const Coupon = require('../../models/couponSchema')
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();  
-
-
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
