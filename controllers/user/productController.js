@@ -6,27 +6,30 @@ const Brand = require('../../models/brandSchema');
 const loadProductsPage = async (req, res) => {
     try {
         const userId = req.session.user;
-        console.log('userId:',userId)
+        console.log('userId:', userId)
 
         const user = await User.findById(userId)
-        
+
 
         const products = await Product.find({
             isBlocked: false,
             quantity: { $gt: 0 }
-        }).populate('category').populate('brand').sort({ createdAt: -1 });   
-       
+        }).populate('category').populate('brand').sort({ createdAt: -1 });
 
-        const categories = await Category.find({isListed: true});
-        const brands = await Brand.find({isBlocked: false});
-        const wishlist = user.wishlist
-        console.log('wishlist',wishlist)
-        
-        res.render('shoping', {products, categories, brands, wishlist});
+
+        const categories = await Category.find({ isListed: true });
+        const brands = await Brand.find({ isBlocked: false });
+        if (!user.wishlist) {
+            user.wishlist = []
+        }
+        const wishlist = user.wishlist || []
+        console.log('wishlist', wishlist)
+
+        res.render('shoping', { products, categories, brands, wishlist });
 
     } catch (error) {
         console.error('Error loading the shopping page:', error);
-        res.status(500).render('error', { message: 'Error loading products' });
+        res.status(500).render('page-404', { message: 'Error loading products' });
     }
 };
 
@@ -34,7 +37,7 @@ const applyFilters = async (req, res) => {
     try {
         const { categories, brands, sortBy, search } = req.body;
         const userId = req.session.user;
-        
+
         let query = {
             isBlocked: false,
             quantity: { $gt: 0 }
@@ -87,9 +90,9 @@ const applyFilters = async (req, res) => {
     }
 };
 
-const productDetails = async (req,res) => {
+const productDetails = async (req, res) => {
     try {
-        
+
         const userId = req.session.user;
         const userData = await User.findById(userId);
         const productId = req.query.id;
@@ -99,27 +102,27 @@ const productDetails = async (req,res) => {
         const productOffer = product.productOffer;
         const totalOffer = categoryOffer || productOffer;
         const products = await Product.find({
-            _id:{$ne:product._id},
-            isBlocked:false,
-            category:findCategory
+            _id: { $ne: product._id },
+            isBlocked: false,
+            category: findCategory
         })
         console.log(product.quantity)
-        products.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt))
-        products.slice(0,4)
-        res.render('product-details',{
-            user:userData,
-            product:product,
-            quantity:product.quantity,
-            totalOffer:totalOffer,
-            category:findCategory,
-            products:products 
+        products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        products.slice(0, 4)
+        res.render('product-details', {
+            user: userData,
+            product: product,
+            quantity: product.quantity,
+            totalOffer: totalOffer,
+            category: findCategory,
+            products: products
         })
 
     } catch (error) {
-        console.log('error in fetching details',error)
+        console.log('error in fetching details', error)
         res.redirect('/pageNotFound')
     }
 }
 
 
-module.exports = {productDetails,loadProductsPage,applyFilters}
+module.exports = { productDetails, loadProductsPage, applyFilters }
