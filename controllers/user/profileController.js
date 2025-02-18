@@ -11,6 +11,7 @@ const mongoose = require("mongoose");
 
 const loadProfile = async (req, res) => {
     try {
+        
         const userId = req.session.user;
         console.log('Session user ID:', userId);
 

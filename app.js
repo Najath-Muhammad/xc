@@ -1,30 +1,31 @@
 const express = require('express');
 const app = express();
 const env = require('dotenv').config();
-const session = require('express-session')
+const session = require('express-session');
 const db = require('./config/db');
 const path = require('path');
-const userRouter = require('./routes/userRouter')
+const userRouter = require('./routes/userRouter');
 const passport = require('./config/passport');
-const adminRouter = require('./routes/adminRouter')
-const MongoStore = require('connect-mongo'); 
-const setUserInLocals = require('./middlewares/setUserInLocals')
-// const nocache = require('nocache');
+const adminRouter = require('./routes/adminRouter');
+const MongoStore = require('connect-mongo');
+const setUserInLocals = require('./middlewares/setUserInLocals');
+
+// Initialize database connection
 db();
 
-// app.use(nocache());
+// Middleware setup
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 app.use(session({
-    secret:process.env.SESSION_SECRET,
-    resave:false,
-    saveUninitialized:true,
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
     store: MongoStore.create({
-        mongoUrl: 'mongodb://localhost:27017/yourdb',
+        mongoUrl: process.env.MONGODB_URI,
         collectionName: 'sessions'
     }),
-    cookie:{
-        secure:false,
+    cookie: {
+        secure: false,
         maxAge: 24 * 3600 * 1000
     }
 }));
@@ -37,19 +38,22 @@ app.use((req, res, next) => {
     next();
 });
 
-app.set('view engine','ejs');
+// View engine setup
+app.set('view engine', 'ejs');
 app.set('views', [
     path.join(__dirname, 'views/user'),
-    path.join(__dirname, 'views/admin'), // Fixed the typo here
+    path.join(__dirname, 'views/admin')
 ]);
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/',userRouter);
-app.use('/admin',adminRouter)
+// Routes setup
+app.use('/', userRouter);
+app.use('/admin', adminRouter);
 
-app.listen(process.env.PORT,()=>{
-    console.log('server started at port '+process.env.PORT)
-})
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log('Server started at port ' + PORT);
+});
 
-
-module.exports = app
+module.exports = app;

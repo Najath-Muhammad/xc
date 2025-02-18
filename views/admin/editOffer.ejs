@@ -46,7 +46,6 @@
     </style>
 
     <div class="main-content">
-    
         <div class="form-section">
             <form id="editOfferForm" action="/admin/offers/updateOffer/<%= offer._id %>" method="POST" onsubmit="return validateForm()">
                 <div class="mb-3">
@@ -61,7 +60,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="createdDate" class="form-label">Start Date</label>
-                    <input type="date" class="form-control" id="createdDate" name="startDate" value="<%= new Date(offer.createdDate).toISOString().split('T')[0] %>"" >
+                    <input type="date" class="form-control" id="createdDate" name="startDate" value="<%= new Date(offer.createdDate).toISOString().split('T')[0] %>" >
                     <p class="error" id="startDateError"></p>
                 </div>
                 <div class="mb-3">
@@ -81,10 +80,11 @@
         function validateForm() {
             let isValid = true;
 
-            const title = document.getElementById('offerTitle').value;
-            const discount = document.getElementById('offerDiscount').value;
-            const startDate = document.getElementById('offerStartDate').value;
-            const endDate = document.getElementById('offerEndDate').value;
+            // Updated IDs to match the form input IDs
+            const title = document.getElementById('name').value;
+            const discount = document.getElementById('discount').value;
+            const startDate = document.getElementById('createdDate').value;
+            const endDate = document.getElementById('expiring').value;
 
             // Clear previous error messages
             document.getElementById('titleError').textContent = '';

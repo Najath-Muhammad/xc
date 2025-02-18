@@ -133,61 +133,41 @@ const updateItemInCart = async (req, res) => {
       const userId = req.session.user;
       const { itemId, quantity } = req.body;
 
-      // Find the cart
       const cart = await Cart.findOne({ userId }).populate('items.productId');
 
       if (!cart) {
-          return res.redirect('/cart');
+          return res.status(404).json({ success: false, message: 'Cart not found' });
       }
 
-      // Find the specific cart item
       const cartItem = cart.items.find(item => item._id.toString() === itemId);
 
       if (!cartItem) {
-          return res.redirect('/cart');
+          return res.status(404).json({ success: false, message: 'Item not found in cart' });
       }
 
-      // Check product stock and max quantity limit
       const product = await Product.findById(cartItem.productId);
-      
+
       if (!product) {
-          return res.redirect('/cart');
+          return res.status(404).json({ success: false, message: 'Product not found' });
       }
 
-      // Validate quantity against stock and max limit
       if (quantity > product.quantity || quantity > 10) {
-          // Option to add flash message if you're using connect-flash
-          // req.flash('error', 'Quantity exceeds available stock or maximum limit');
-          return res.redirect('/cart');
+          return res.status(400).json({ success: false, message: 'Quantity exceeds available stock or maximum limit' });
       }
 
-      // Update item quantity and total price
       cartItem.quantity = quantity;
       cartItem.totalPrice = cartItem.price * quantity;
 
-      // Recalculate cart total
       cart.totalPrice = cart.items.reduce((total, item) => total + item.totalPrice, 0);
 
-      // Save updated cart
       await cart.save();
 
-      // Recalculate total quantity
-      const productIds = cart.items.map(item => item.productId._id);
-      const products = await Product.find({ _id: { $in: productIds } });
-      const totalQuantity = cart.items.reduce((total, item) => {
-          const product = products.find(p => p._id.equals(item.productId._id));
-          return total + (product ? item.quantity : 0);
-      }, 0);
 
-      // Render cart page with updated data
-      res.render('cart', { 
-          cart: cart, 
-          quantity: totalQuantity 
-      });
+      res.status(200).json({ success: true, cart: cart });
 
   } catch (error) {
       console.error('Error updating cart item:', error);
-      res.status(500).render('page-404', { message: 'Internal server error' });
+      res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 

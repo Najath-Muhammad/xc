@@ -367,26 +367,34 @@
                         itemId: input.closest('tr').getAttribute('data-item-id'),
                         quantity: currentQuantity 
                     })
-                }).then(response => response.json())
+                })
+                .then(response => {
+                    console.log('Server response:', response); // Log the response
+                    if (!response.ok) {
+                        return response.json().then(err => { throw err; });
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Response data:', data); // Log the response data
                     if (data.success) {
                         updateCartTotal();
-                        updateAvailableCoupons(); // Call this to refresh coupons
+                        updateAvailableCoupons();
+                    } else {
+                        alert(data.message || 'Failed to update quantity');
                     }
                 })
                 .catch(error => {
                     console.error('Error updating quantity:', error);
+                    alert(error.message || 'Error updating quantity. Please try again.');
                 });
             };
-                
-            // Direct input validation
+
             input.addEventListener('input', function() {
-                // Remove non-numeric characters
                 this.value = this.value.replace(/[^0-9]/g, '');
                 validateAndUpdateQuantity();
             });
-    
-            // Increment/decrement buttons
+
             const increaseBtn = document.createElement('button');
             increaseBtn.textContent = '+';
             increaseBtn.type = 'button';
@@ -410,7 +418,7 @@
             input.parentNode.insertBefore(increaseBtn, input.nextSibling);
         });
     
-        // Function to update cart total
+
         function updateCartTotal() {
             const cartTotalElement = document.querySelector('.cart__total ul li:last-child span');
             const totalPrice = Array.from(document.querySelectorAll('.cart__price'))
@@ -421,32 +429,35 @@
             cartTotalElement.textContent = `₹ ${totalPrice.toFixed(2)}`;
         }
     
-        // Function to update available coupons
         function updateAvailableCoupons() {
-            const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
-            const couponItems = document.querySelectorAll('.coupon-item');
+        const subtotal = parseFloat(document.querySelector('.cart__total ul li:first-child span').textContent.replace('₹', '').trim());
+        const couponItems = document.querySelectorAll('.coupon-item');
 
-            couponItems.forEach(couponItem => {
-                const minPrice = parseFloat(couponItem.getAttribute('data-min-price'));
-                const canUse = subtotal >= minPrice;
-                const couponStatus = couponItem.querySelector('.coupon-status');
-                const applyCouponButton = couponItem.querySelector('.apply-coupon');
+        console.log('Subtotal:', subtotal);
 
-                if (canUse) {
-                    couponItem.classList.remove('invalid');
-                    if (couponStatus) couponStatus.style.display = 'none';
-                    if (applyCouponButton) applyCouponButton.style.display = 'block';
-                } else {
-                    couponItem.classList.add('invalid');
-                    if (couponStatus) {
-                        couponStatus.textContent = 'Cart value too low';
-                        couponStatus.style.display = 'block';
-                    }
-                    if (applyCouponButton) applyCouponButton.style.display = 'none';
+        couponItems.forEach(couponItem => {
+            const minPrice = parseFloat(couponItem.getAttribute('data-min-price'));
+            const canUse = subtotal >= minPrice; // Define `canUse` here
+            const couponStatus = couponItem.querySelector('.coupon-status');
+            const applyCouponButton = couponItem.querySelector('.apply-coupon');
+
+            console.log('Coupon minPrice:', minPrice); // Log the minimum price for each coupon
+            console.log('Can use coupon:', canUse); // Log whether the coupon can be used
+
+            if (canUse) {
+                couponItem.classList.remove('invalid');
+                if (couponStatus) couponStatus.style.display = 'none';
+                if (applyCouponButton) applyCouponButton.style.display = 'block';
+            } else {
+                couponItem.classList.add('invalid');
+                if (couponStatus) {
+                    couponStatus.textContent = 'Cart value too low';
+                    couponStatus.style.display = 'block';
                 }
-            });
-        }
-    
+                if (applyCouponButton) applyCouponButton.style.display = 'none';
+            }
+        });
+}
         // Coupon application logic
         const applyCouponButtons = document.querySelectorAll('.apply-coupon');
         const appliedCouponSection = document.getElementById('appliedCoupon');

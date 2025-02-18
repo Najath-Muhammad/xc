@@ -9,6 +9,7 @@ const Coupon = require('../../models/couponSchema')
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config();  
 
 
 
@@ -118,6 +119,9 @@ const loadOrderPlaced = async (req, res) => {
 };
 const loadOrderDetails = async (req, res) => {
     try {
+        console.log('Razorpay Key ID:', process.env.RAZORPAY_KEY_ID);  // Ensure it's not undefined
+console.log('Razorpay Key Secret:', process.env.RAZORPAY_KEY_SECRET);  // Ensure it's not undefined
+
         const order = await Order.findOne({ orderId: req.params.orderId })
             .populate('orderedItems.product')
 

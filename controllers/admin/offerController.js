@@ -6,10 +6,6 @@ const loadOfferPage = async (req, res) => {
     try {
         const offers = await Offer.find({});
         
-        // offers.forEach(data=>{
-        //     let date = data.createdDate.toLocaleString()
-        //     console.log(typeof(date))
-        // })
         
         const formattedOffers = offers.map(offer => ({
             ...offer.toObject(),
