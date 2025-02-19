@@ -204,17 +204,23 @@
                                 <% } %>
                                 <div id="product-data" data-quantity="<%= product.quantity %>"></div>
                             </div>
-                            <%if(user.wishlist.includes(product._id)){%>
-                                <p style="font-weight: 800; font-size: 20px;">Already Added to Wishlist</p>
-                            <%}else{%>   
-                            <div class="product__details__btns__option">
-                                <button class="primary-btn" onclick="addToWishlist('<%=product._id%>')">
-                                    <a href="" style="color: white;"><i class="fa fa-heart"></i> add to wishlist</a>
-                                </button>
-                                
-                                <!-- <a href="#"><i class="fa fa-exchange"></i> Add To Compare</a> -->
-                            </div>
-                            <%}%>
+                            <% if (user) { %>
+                                <% if (user.wishlist && user.wishlist.includes(product._id)) { %>
+                                    <p style="font-weight: 800; font-size: 20px;">Already Added to Wishlist</p>
+                                <% } else { %>   
+                                    <div class="product__details__btns__option">
+                                        <button class="primary-btn" onclick="addToWishlist('<%=product._id%>')">
+                                            <a href="" style="color: white;"><i class="fa fa-heart"></i> add to wishlist</a>
+                                        </button>
+                                    </div>
+                                <% } %>
+                            <% } else { %>
+                                <div class="product__details__btns__option">
+                                    <button class="primary-btn" onclick="window.location.href='/login'">
+                                        <a style="color: white;"><i class="fa fa-heart"></i> Login to add to wishlist</a>
+                                    </button>
+                                </div>
+                            <% } %>
                             <!-- <div class="product__details__last__option">
                                 <h5><span>Guaranteed Safe Checkout</span></h5>
                                 <img src="img/shop-details/details-payment.png" alt="">

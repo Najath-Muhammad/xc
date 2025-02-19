@@ -5,27 +5,30 @@ const Brand = require('../../models/brandSchema');
 
 const loadProductsPage = async (req, res) => {
     try {
-        const userId = req.session.user;
-        console.log('userId:', userId)
-
-        const user = await User.findById(userId)
-
-
+        let wishlist = [];
+        
         const products = await Product.find({
             isBlocked: false,
             quantity: { $gt: 0 }
         }).populate('category').populate('brand').sort({ createdAt: -1 });
 
-
         const categories = await Category.find({ isListed: true });
         const brands = await Brand.find({ isBlocked: false });
-        if (!user.wishlist) {
-            user.wishlist = []
-        }
-        const wishlist = user.wishlist || []
-        console.log('wishlist', wishlist)
 
-        res.render('shoping', { products, categories, brands, wishlist });
+        if (req.session.user) {
+            const userId = req.session.user;
+            const user = await User.findById(userId);
+            if (user) {
+                wishlist = user.wishlist || [];
+            }
+        }
+
+        res.render('shoping', { 
+            products, 
+            categories, 
+            brands, 
+            wishlist 
+        });
 
     } catch (error) {
         console.error('Error loading the shopping page:', error);
@@ -92,35 +95,45 @@ const applyFilters = async (req, res) => {
 
 const productDetails = async (req, res) => {
     try {
-
-        const userId = req.session.user;
-        const userData = await User.findById(userId);
         const productId = req.query.id;
         const product = await Product.findById(productId).populate('category');
-        const findCategory = product.category
+        
+        if (!product) {
+            return res.redirect('/pageNotFound');
+        }
+
+        const findCategory = product.category;
         const categoryOffer = findCategory?.categoryOffer || 0;
         const productOffer = product.productOffer;
         const totalOffer = categoryOffer || productOffer;
-        const products = await Product.find({
+
+
+        const relatedProducts = await Product.find({
             _id: { $ne: product._id },
             isBlocked: false,
             category: findCategory
         })
-        console.log(product.quantity)
-        products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        products.slice(0, 4)
+        .sort({ createdAt: -1 })
+        .limit(4); 
+
+
+        let userData = null;
+        if (req.session.user) {
+            userData = await User.findById(req.session.user);
+        }
+
         res.render('product-details', {
             user: userData,
             product: product,
             quantity: product.quantity,
             totalOffer: totalOffer,
             category: findCategory,
-            products: products
-        })
+            products: relatedProducts
+        });
 
     } catch (error) {
-        console.log('error in fetching details', error)
-        res.redirect('/pageNotFound')
+        console.log('error in fetching details', error);
+        res.redirect('/pageNotFound');
     }
 }
 
