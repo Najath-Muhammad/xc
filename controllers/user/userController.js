@@ -95,7 +95,7 @@ async function sendVerification(email,otp){
   
 const signUp = async (req, res) => {
     console.log('body', req.body);
-    const { fullname, email, phone, password, referralCode } = req.body; // Correct the spelling here
+    const { fullname, email, phone, password, referralCode } = req.body;
 
     try {
         const newUser = new User({ fullname, email, phone, password });
@@ -106,16 +106,17 @@ const signUp = async (req, res) => {
 
         const otp = generateOtp();
         const emailSent = await sendVerification(email, otp);
-        if (!emailSent) {
-            return res.json("Email error");
-        } else {
-            req.session.referralCode = referralCode; // Correct the spelling here
+        // if (!emailSent) {
+        //     return res.json("Email error");
+        // } else {
+
+            req.session.referralCode = referralCode;
             req.session.userOtp = otp;
             req.session.user = { fullname, email, phone, password };
 
             console.log("OTP sent", otp);
             return res.render('verify-otp');
-        }
+        // }
 
     } catch (error) {
         console.log('Error in Sign-Up', error);
