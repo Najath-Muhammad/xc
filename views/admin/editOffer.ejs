@@ -1,143 +1,149 @@
 <%- include('../../views/partials/admin/header') %>
-    <style>
-        :root {
-            --primary: #4facfe;
-            --primary-hover: #00f2fe;
-            --dark: #333;
-        }
-        .form-section {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
-        }
-
-        .form-section h3 {
-            margin-bottom: 20px;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            border-color: var(--primary);
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-            border-color: var(--primary-hover);
-        }
-
-        .btn-secondary {
-            margin-right: 10px;
-        }
-
-        .error {
-            color: red;
-            font-size: 0.9rem;
-            margin-top: -10px;
-            margin-bottom: 10px;
-        }
-    </style>
-
-    <div class="main-content">
-        <div class="form-section">
-            <form id="editOfferForm" action="/admin/offers/updateOffer/<%= offer._id %>" method="POST" onsubmit="return validateForm()">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Offer Title</label>
-                    <input type="text" class="form-control" id="name" name="title" value="<%= offer.name %>" >
-                    <p class="error" id="titleError"></p>
-                </div>
-                <div class="mb-3">
-                    <label for="discount" class="form-label">Discount Percentage</label>
-                    <input type="number" class="form-control" id="discount" name="discount" value="<%= offer.discount %>"  min="1" max="100">
-                    <p class="error" id="discountError"></p>
-                </div>
-                <div class="mb-3">
-                    <label for="createdDate" class="form-label">Start Date</label>
-                    <input type="date" class="form-control" id="createdDate" name="startDate" value="<%= new Date(offer.createdDate).toISOString().split('T')[0] %>" >
-                    <p class="error" id="startDateError"></p>
-                </div>
-                <div class="mb-3">
-                    <label for="expiring" class="form-label">End Date</label>
-                    <input type="date" class="form-control" id="expiring" name="endDate" value="<%= new Date(offer.expiring).toISOString().split('T')[0] %>">
-                    <p class="error" id="endDateError"></p>
-                </div>
-                <div class="mt-4">
-                    <a href="/admin/offers" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Update Offer</button>
-                </div>
-            </form>
-        </div>
+<div class="main-content">
+    <div class="form-section">
+        <% if (error) { %>
+            <div class="alert alert-danger" role="alert">
+                <%= error %>
+            </div>
+        <% } %>
+        
+        <form id="editOfferForm" onsubmit="handleSubmit(event)">
+            <div class="mb-3">
+                <label for="name" class="form-label">Offer Title</label>
+                <input type="text" class="form-control" id="name" name="title" value="<%= offer.name %>" required>
+                <p class="error" id="titleError"></p>
+            </div>
+            
+            <div class="mb-3">
+                <label for="discount" class="form-label">Discount Percentage</label>
+                <input type="number" class="form-control" id="discount" name="discount" 
+                       value="<%= offer.discount %>" min="1" max="100" required>
+                <p class="error" id="discountError"></p>
+            </div>
+            
+            <div class="mb-3">
+                <label for="startDate" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" 
+                       value="<%= new Date(offer.createdDate).toISOString().split('T')[0] %>" required>
+                <p class="error" id="startDateError"></p>
+            </div>
+            
+            <div class="mb-3">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" 
+                       value="<%= new Date(offer.expiring).toISOString().split('T')[0] %>" required>
+                <p class="error" id="endDateError"></p>
+            </div>
+            
+            <div class="mt-4">
+                <a href="/admin/offers" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Update Offer</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <script>
-        function validateForm() {
-            let isValid = true;
+<script>
+function validateForm() {
+    let isValid = true;
+    const title = document.getElementById('name').value.trim();
+    const discount = document.getElementById('discount').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    // Clear previous errors
+    document.querySelectorAll('.error').forEach(el => el.textContent = '');
+    
+    if (!title) {
+        document.getElementById('titleError').textContent = 'Please enter a title';
+        isValid = false;
+    }
+    
+    if (!discount || discount < 1 || discount > 100) {
+        document.getElementById('discountError').textContent = 'Discount must be between 1 and 100';
+        isValid = false;
+    }
+    
+    if (!startDate) {
+        document.getElementById('startDateError').textContent = 'Please select a start date';
+        isValid = false;
+    }
+    
+    if (!endDate) {
+        document.getElementById('endDateError').textContent = 'Please select an end date';
+        isValid = false;
+    } else if (new Date(startDate) > new Date(endDate)) {
+        document.getElementById('endDateError').textContent = 'End date cannot be earlier than start date';
+        isValid = false;
+    }
+    
+    return isValid;
+}
 
-            // Updated IDs to match the form input IDs
-            const title = document.getElementById('name').value;
-            const discount = document.getElementById('discount').value;
-            const startDate = document.getElementById('createdDate').value;
-            const endDate = document.getElementById('expiring').value;
+async function handleSubmit(event) {
+    event.preventDefault();
+    
+    if (!validateForm()) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please check the form for errors.',
+        });
+        return;
+    }
 
-            // Clear previous error messages
-            document.getElementById('titleError').textContent = '';
-            document.getElementById('discountError').textContent = '';
-            document.getElementById('startDateError').textContent = '';
-            document.getElementById('endDateError').textContent = '';
+    try {
+        const formData = {
+            title: document.getElementById('name').value.trim(),
+            discount: document.getElementById('discount').value,
+            startDate: document.getElementById('startDate').value,
+            endDate: document.getElementById('endDate').value
+        };
 
-            if (!title) {
-                document.getElementById('titleError').textContent = 'Please enter a title.';
-                isValid = false;
-            }
+        const response = await fetch('/admin/offers/updateOffer/<%= offer._id %>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
 
-            if (!discount || discount < 1 || discount > 100) {
-                document.getElementById('discountError').textContent = 'Discount must be between 1 and 100.';
-                isValid = false;
-            }
+        const result = await response.json();
 
-            if (!startDate) {
-                document.getElementById('startDateError').textContent = 'Please select a start date.';
-                isValid = false;
-            }
-
-            if (!endDate) {
-                document.getElementById('endDateError').textContent = 'Please select an end date.';
-                isValid = false;
-            } else if (new Date(startDate) > new Date(endDate)) {
-                document.getElementById('endDateError').textContent = 'End date cannot be earlier than start date.';
-                isValid = false;
-            }
-
-            if (!isValid) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Validation Error',
-                    text: 'Please check the form for errors.',
-                });
-            }
-
-            return isValid;
+        if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: result.message,
+            }).then(() => {
+                window.location.href = '/admin/offers';
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: result.message,
+            });
         }
-
-        // Show confirmation before leaving page with unsaved changes
-        let formChanged = false;
-        document.getElementById('editOfferForm').addEventListener('change', function() {
-            formChanged = true;
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to update offer. Please try again.',
         });
+    }
+}
 
-        window.addEventListener('beforeunload', function(e) {
-            if (formChanged) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        });
-    </script>
-</body>
-</html>
+// Track form changes
+let formChanged = false;
+document.getElementById('editOfferForm').addEventListener('input', () => {
+    formChanged = true;
+});
+
+window.addEventListener('beforeunload', (e) => {
+    if (formChanged) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
