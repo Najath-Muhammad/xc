@@ -98,8 +98,8 @@ const signUp = async (req, res) => {
     const { fullname, email, phone, password, referralCode } = req.body;
 
     try {
-        const newUser = new User({ fullname, email, phone, password });
-        const findUser = await User.findOne({ email });
+        // const newUser = new User({ fullname, email, phone, password });
+        const findUser = await User.findOne({ email:email });
         if (findUser) {
             return res.render('signup', { message: "Email already exists" });
         }
@@ -112,7 +112,7 @@ const signUp = async (req, res) => {
 
             req.session.referralCode = referralCode;
             req.session.userOtp = otp;
-            req.session.user = { fullname, email, phone, password };
+            req.session.userData = { fullname, email, phone, password };
 
             console.log("OTP sent", otp);
             console.log("OTP sent");
@@ -145,7 +145,7 @@ const varifyOtp = async (req, res) => {
         console.log('Session OTP:', req.session.userOtp);
 
         if (otp === req.session.userOtp) {
-            const user = req.session.user;
+            const user = req.session.userData;
             if (!user) {
                 return res.status(400).json({ success: false, message: 'User session not found' });
             }
