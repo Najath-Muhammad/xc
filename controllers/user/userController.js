@@ -39,7 +39,7 @@ const loadHomepage = async (req, res) => {
         // console.log(products);
         if (user) {
             const userData = await User.findOne({ _id: user });
-           // console.log('userData:',userData)
+           //console.log('userData:',userData)
             res.render('home', { user: userData, products: products });
         } else {
             res.render('home', { products: products });
@@ -66,29 +66,34 @@ function generateOtp(){
 }
 
 
-async function sendVerification(email,otp){
+async function sendVerification(email, otp) {
     try {
         const transporter = nodemailer.createTransport({
-            service:'gmail',
-            port:587,
-            secure:false,
-            requireTLS:true,
-            auth:{
-                user:process.env.NODEMAILER_EMAIL,
-                pass:process.env.NODEMAILER_PASSWORD
-            },
+            host: 'smtp.gmail.com',
+            service: 'gmail',
+            port: 465,         
+            secure: true,     
+            auth: {
+                user: process.env.NODEMAILER_EMAIL,
+                pass: process.env.NODEMAILER_PASSWORD
+            }
         });
-        const info = await transporter.sendMail({
-            from:process.env.NODEMAILER_EMAIL,
+
+        const mailOptions = {
+            from: process.env.NODEMAILER_EMAIL,
             to: email,
             subject: 'Verify your email',
-            text:`Your OTP is ${otp}`,
-            html:`<b>Your OTP: ${otp}</b>`
-        })
+            text: `Your OTP is ${otp}`,
+            html: `<b>Your OTP: ${otp}</b>`
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully:', info.response);
         return info.accepted.length > 0;
+
     } catch (error) {
-        console.log("Error sending OTP",error);
-        return false;
+        console.log("Error sending OTP", error);
+        throw error; 
     }
 }
 
