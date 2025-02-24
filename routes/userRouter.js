@@ -19,7 +19,7 @@ router.get('/pageNotfound', userLogin, userController.pageNotFound);
 router.get('/', userController.loadHomepage);
 router.get('/signup', userLogin, userController.loadSignup);
 router.post('/signup', userLogin, userController.signUp);
-router.post('/verify-otp', userController.varifyOtp);
+router.post('/verify-otp', userController.verifyOtp);
 router.post('/resend-otp', userLogin, userController.resendOtp);
 
 router.get('/auth/google', userLogin, passport.authenticate('google', { scope: ['profile', 'email'] }));

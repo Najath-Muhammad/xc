@@ -137,8 +137,8 @@ const securePassword = async (password)=>{
 }
 
 
-const varifyOtp = async (req, res) => {
-    console.log('haaaaaaaaai');
+const verifyOtp = async (req, res) => {
+    // console.log('haaaaaaaaai');
     try {
         const { otp } = req.body;
         console.log('Received OTP:', otp);
@@ -161,7 +161,15 @@ const varifyOtp = async (req, res) => {
 
             await saveUserData.save();
 
-            const referralCode = req.session.referralCode; // Correct the spelling here
+            const newWallet = new Wallet({
+                userId: saveUserData._id,
+                balance: 0,
+                transactions: []
+            });
+            await newWallet.save();
+            console.log('Wallet created for new user:', saveUserData.email);
+
+            const referralCode = req.session.referralCode;
             console.log('referral code', referralCode);
             if (referralCode) {
                 const referrer = await User.findOne({ referralCode: referralCode });
@@ -196,7 +204,7 @@ const varifyOtp = async (req, res) => {
             req.session.user = saveUserData._id;
             req.session.userOtp = null;
 
-            res.json({ success: true, redirectUrl: '/' }); // Return redirect URL
+            res.json({ success: true, redirectUrl: '/' });
         } else {
             res.status(400).json({ success: false, message: 'Invalid OTP' });
         }
@@ -530,7 +538,7 @@ const resendOtpForEmailUpdate = async (req, res) => {
 
 
 module.exports = {
-    loadHomepage,pageNotFound,loadSignup,signUp,varifyOtp,resendOtp,loadLogin,login,logout,generateOtp,sendVerification,
+    loadHomepage,pageNotFound,loadSignup,signUp,verifyOtp,resendOtp,loadLogin,login,logout,generateOtp,sendVerification,
     loadForgotPasPage,forgotEmailValid,verifyForgotPassOpt,postNewPassword,sendOtpForEmailUpdatePost,sendOtpForEmailUpdateGet,emailUpdateOtp,
     resendOtpForEmailUpdate
 }

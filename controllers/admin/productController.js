@@ -246,58 +246,67 @@ const getEditProduct = async (req, res) => {
 
 const editProducts = async (req, res) => {
     try {
-      const id = req.params.id;
-      const data = req.body;
-      console.log('data',data)
+        const id = req.params.id;
+        const data = req.body;
+        console.log('data', data);
 
-      
+        // Check for duplicate product name
         const existingProduct = await Product.findOne({
-        productName: data.productName,
-        _id: { $ne: id },
-      });
-  
-      if (existingProduct) {
-        return res.status(400).json({ error: 'Product with this name already exists. Please try with another name.' });
-      }
-    
-        // const a = await Product.findOne({
-        //     _id:id
-        // })
-        
-        // if(a.quantity<5){
-        //     res.json({message:'The Product is in Less stock Update the stock'})
-        // }
-    
-  
-      let images = [];
-      if (req.files && req.files.length > 0) {
-        images = req.files.map((file) => file.filename); 
-      }
+            productName: data.productName,
+            _id: { $ne: id }
+        });
 
-      const updateFields = {
-        productName: data.productName,
-        description: data.description,
-        brand: data.brand,
-        category: data.category._id,
-        regularPrice: data.regularPrice,
-        salePrice: data.salePrice,
-        quantity: data.quantity,
-        size: data.size,
-        color: data.color,
-      };
-  
-      if (images.length > 0) {
-        updateFields.productImage = images;
-      }
-  
-      await Product.findByIdAndUpdate(id, updateFields, { new: true });
-  
-      res.redirect('/admin/products');
+        if (existingProduct) {
+            return res.status(400).json({ 
+                error: 'Product with this name already exists. Please try with another name.' 
+            });
+        }
+
+        // Get the existing product to preserve current images
+        const currentProduct = await Product.findById(id);
+        
+        // Handle images
+        let updatedImages = [...(currentProduct.productImage || [])]; // Start with existing images
+        
+        if (req.files && req.files.length > 0) {
+            const newImages = req.files.map(file => file.filename);
+            updatedImages = [...updatedImages, ...newImages]; // Combine existing and new images
+        }
+
+        // If existingImages is provided in the request (for cases where some images were deleted)
+        if (data.existingImages) {
+            // Convert to array if single value
+            const existingImages = Array.isArray(data.existingImages) 
+                ? data.existingImages 
+                : [data.existingImages];
+            
+            // Only keep images that are in existingImages array
+            updatedImages = updatedImages.filter(img => 
+                existingImages.includes(img)
+            );
+        }
+
+        const updateFields = {
+            productName: data.productName,
+            description: data.description,
+            brand: data.brand,
+            category: data.category._id,
+            regularPrice: data.regularPrice,
+            salePrice: data.salePrice,
+            quantity: data.quantity,
+            size: data.size,
+            color: data.color,
+            productImage: updatedImages 
+        };
+
+        await Product.findByIdAndUpdate(id, updateFields, { new: true });
+
+        res.redirect('/admin/products');
     } catch (error) {
-      console.error(error);
-      res.redirect('/pageerror');
+        console.error(error);
+        res.redirect('/pageerror');
     }
-  };
+};
   
 
 
