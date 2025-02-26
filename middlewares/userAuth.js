@@ -8,7 +8,7 @@ const userAuth = (req,res,next)=>{
 }
 const userLogin = (req,res,next)=>{
     if(req.session.user){
-        return res.redirect('/');
+        return res.redirect('/');884
     }
     else{   
         return next();

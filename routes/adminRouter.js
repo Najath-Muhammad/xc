@@ -20,7 +20,7 @@ const upload = multer({ storage: storage })
 router.get('/error',adminController.pageError);
 router.get('/login',isLogin,adminController.loadLogin);
 router.post('/login',adminController.login);
-router.get('/dashboard',adminController.loadDashboard)
+router.get('/dashboard',isAuthenticated,adminController.loadDashboard)
 router.get('/logout',adminController.logout);
 
 

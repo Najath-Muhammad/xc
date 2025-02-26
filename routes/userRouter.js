@@ -14,7 +14,7 @@ const wishlistController = require('../controllers/user/wishlistController')
 const walletController = require('../controllers/user/walletController')
 const { userAuth, userLogin } = require('../middlewares/userAuth');
 
-router.get('/pageNotfound', userLogin, userController.pageNotFound);
+router.get('/pageNotfound', userController.pageNotFound);
 
 router.get('/', userController.loadHomepage);
 router.get('/signup', userLogin, userController.loadSignup);
@@ -41,9 +41,9 @@ router.get('/sendOtpForEmailUpdate', userController.sendOtpForEmailUpdateGet);
 router.post('/emailUpdateOtp', userController.emailUpdateOtp);
 router.post('/resendOtp',userController.resendOtpForEmailUpdate);
 
-router.get('/products', productController.loadProductsPage);
-router.get('/productDetails', productController.productDetails);
-router.post('/applyFilters',productController.applyFilters);
+router.get('/products', userAuth,productController.loadProductsPage);
+router.get('/productDetails', userAuth,productController.productDetails);
+router.post('/applyFilters',userAuth,productController.applyFilters);
 
 router.get('/profile', profileController.loadProfile);
 router.post('/updateName', profileController.updateName);
@@ -70,6 +70,7 @@ router.post('/cart/removeItem',cartController.removeItemFromCart)
 router.post('/cart/updateItem', cartController.updateItemInCart);
 
 router.get('/checkout',checkoutController.loadCheckout)
+router.get('/validateStock',checkoutController.validateStock)
 
 router.post('/placeOrder',orderController.loadOrderPlaced)
 

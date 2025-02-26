@@ -248,68 +248,88 @@ const editProducts = async (req, res) => {
     try {
         const id = req.params.id;
         const data = req.body;
-        console.log('data', data);
-
-        // Check for duplicate product name
+        const files = req.files;
+        console.log('Request Body:', data);
+        console.log('Uploaded Files:', files);
+        
         const existingProduct = await Product.findOne({
             productName: data.productName,
-            _id: { $ne: id }
+            _id: { $ne: id },
         });
-
+        
         if (existingProduct) {
-            return res.status(400).json({ 
-                error: 'Product with this name already exists. Please try with another name.' 
+            return res.status(400).json({
+                error: 'Product with this name already exists. Please try with another name.',
             });
         }
-
-        // Get the existing product to preserve current images
+        
         const currentProduct = await Product.findById(id);
-        
-        // Handle images
-        let updatedImages = [...(currentProduct.productImage || [])]; // Start with existing images
-        
-        if (req.files && req.files.length > 0) {
-            const newImages = req.files.map(file => file.filename);
-            updatedImages = [...updatedImages, ...newImages]; // Combine existing and new images
+        if (!currentProduct) {
+            return res.status(404).json({ error: 'Product not found' });
         }
 
-        // If existingImages is provided in the request (for cases where some images were deleted)
+        let allImages = [];
+
         if (data.existingImages) {
-            // Convert to array if single value
-            const existingImages = Array.isArray(data.existingImages) 
-                ? data.existingImages 
+            const existingImages = Array.isArray(data.existingImages)
+                ? data.existingImages
                 : [data.existingImages];
             
-            // Only keep images that are in existingImages array
-            updatedImages = updatedImages.filter(img => 
-                existingImages.includes(img)
-            );
+            allImages = [...existingImages];
+            console.log('Selected existing images:', allImages);
+        } else {
+            console.log('No existing images selected');
         }
-
+        
+        if (files && files.length > 0) {
+            const newImages = files.map((file) => file.filename);
+            allImages = [...allImages, ...newImages];
+            console.log('All images before limiting:', allImages);
+        }
+        
+        const updatedImages = allImages.slice(0, 3);
+        console.log('Final limited images array (max 3):', updatedImages);
+        
+        const category = await Category.findOne({name: data.category});
+        
         const updateFields = {
             productName: data.productName,
-            description: data.description,
+            description: data.descriptionData,
             brand: data.brand,
-            category: data.category._id,
+            category: category,
             regularPrice: data.regularPrice,
             salePrice: data.salePrice,
             quantity: data.quantity,
             size: data.size,
             color: data.color,
-            productImage: updatedImages 
+            productImage: updatedImages,
         };
-
-        await Product.findByIdAndUpdate(id, updateFields, { new: true });
-
+        
+        console.log('Final product images to save:', updateFields.productImage);
+        
+        const updatedProduct = await Product.findByIdAndUpdate(id, updateFields, { new: true });
+        
+        if (!updatedProduct) {
+            throw new Error('Failed to update product');
+        }
+        
+        if (files && files.length > 0) {
+            const savedImages = updateFields.productImage;
+            const uploadedImages = files.map(file => file.filename);
+            
+            const unusedImages = uploadedImages.filter(img => !savedImages.includes(img));
+            
+            if (unusedImages.length > 0) {
+                console.log('Unused images that could be deleted:', unusedImages);                
+            }
+        }
+        
         res.redirect('/admin/products');
     } catch (error) {
-        console.error(error);
-        res.redirect('/pageerror');
+        console.error('Error in editProducts:', error);
+        res.status(500).json({ error: error.message });
     }
 };
-  
-
-
 
 
 const deleteSingleImage = async (req,res) => {

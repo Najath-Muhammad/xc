@@ -266,35 +266,94 @@
         </div>
     </div>
 </section>
-<!-- Checkout Section End -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const checkoutForm = document.getElementById('checkout-form');
-        const placeOrderBtn = document.getElementById('placeOrderBtn');
-        const finalAmountInput = document.getElementById('finalAmount');
-        const couponInput = document.getElementById('coupon');
-    
-        placeOrderBtn.addEventListener('click', async function(e) {
-            e.preventDefault();
+    const checkoutForm = document.getElementById('checkout-form');
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const finalAmountInput = document.getElementById('finalAmount');
+    const couponInput = document.getElementById('coupon');
+
+
+    const addressBlocks = document.querySelectorAll('.address-block');
+    addressBlocks.forEach(block => {
+        block.addEventListener('click', function() {
+            const radioInput = this.querySelector('input[type="radio"]');
+            radioInput.checked = true;
             
-            const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
-            if (!selectedAddress) {
+            // Update visual appearance
+            addressBlocks.forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+    
+    placeOrderBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        // First validate if address is selected
+        const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+        if (!selectedAddress) {
+            Swal.fire({
+                title: 'Address Required',
+                text: 'Please select a delivery address to continue',
+                icon: 'warning',
+                confirmButtonColor: '#3399cc',
+                confirmButtonText: 'Okay'
+            });
+            return;
+        }
+        
+        // Then validate stock before placing order
+        try {
+            const stockResponse = await fetch('/validateStock', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!stockResponse.ok) {
+                throw new Error(`HTTP error! status: ${stockResponse.status}`);
+            }
+            
+            const stockData = await stockResponse.json();
+            
+            if (!stockData.valid) {
+                let errorHtml = `${stockData.message}<br><br>`;
+                
+                stockData.outOfStockItems.forEach(item => {
+                    if (item.isBlocked) {
+                        errorHtml += `${item.productName}: This product is no longer available<br>`;
+                    } else if (item.status !== "Available") {
+                        errorHtml += `${item.productName}: ${item.status}<br>`;
+                    } else {
+                        errorHtml += `${item.productName}: Requested ${item.requestedQuantity}, Available ${item.availableQuantity}<br>`;
+                    }
+                });
+                
                 Swal.fire({
-                    title: 'Address Required',
-                    text: 'Please select a delivery address to continue',
+                    title: 'Stock Issue',
+                    html: errorHtml,
                     icon: 'warning',
                     confirmButtonColor: '#3399cc',
-                    confirmButtonText: 'Okay'
+                    confirmButtonText: 'Return to Cart'
+                }).then(() => {
+                    window.location.href = '/cart';
                 });
                 return;
             }
-    
+            
+            // Continue with order placement if stock validation passed
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
             const total = parseFloat(finalAmountInput.value);
-    
             const initialPaymentStatus = paymentMethod === 'cod' ? 'Pending' : 'Pending';
 
+            const paymentStatusInput = document.createElement('input');
+            paymentStatusInput.type = 'hidden';
+            paymentStatusInput.name = 'paymentStatus';
+            paymentStatusInput.value = initialPaymentStatus;
+            checkoutForm.appendChild(paymentStatusInput);
+            
             const formData = {
                 selectedAddress: selectedAddress.value,
                 paymentMethod: paymentMethod,
@@ -304,13 +363,6 @@
                 coupon: couponInput.value
             };
 
-            const paymentStatusInput = document.createElement('input');
-            paymentStatusInput.type = 'hidden';
-            paymentStatusInput.name = 'paymentStatus';
-            paymentStatusInput.value = initialPaymentStatus;
-       
-            checkoutForm.appendChild(paymentStatusInput);
-    
             if (paymentMethod === 'razorpay') {
                 try {
                     const response = await fetch('/createOrder', {
@@ -319,23 +371,23 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            amount: total , 
+                            amount: total, 
                             currency: 'INR',
                             paymentStatus: initialPaymentStatus
                         })
                     });
-    
+        
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
-    
+        
                     const orderData = await response.json();
                     console.log('Order creation response:', orderData);
                     
                     if (!orderData.success) {
                         throw new Error(orderData.message || 'Failed to create order');
                     }
-    
+        
                     const options = {
                         key: '<%= process.env.RAZORPAY_KEY_ID %>',
                         amount: orderData.amount,
@@ -355,9 +407,9 @@
                                         'Content-Type': 'application/json'
                                     },
                                     body: JSON.stringify({
-                                    ...response,
-                                    paymentStatus: 'Completed'
-                                })
+                                        ...response,
+                                        paymentStatus: 'Completed'
+                                    })
                                 });
 
                                 if (!verifyResponse.ok) {
@@ -368,16 +420,14 @@
                                 console.log('Verification response:', verifyData);
 
                                 if (verifyData.success) {
-
                                     await fetch('/updatePaymentStatus', {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({
-                                            orderId: orderId,
+                                            orderId: orderData.dbOrderId,
                                             paymentId: response.razorpay_payment_id
                                         })
                                     });
-
                                     
                                     checkoutForm.submit();
                                 } else {
@@ -419,24 +469,48 @@
                                     confirmButtonText: 'OK'
                                 });
                 
-                checkoutForm.submit();
-            }
+                                checkoutForm.submit();
+                            }
                         }
                     };
 
                     const rzp = new Razorpay(options);
                     rzp.open();
-
     
                 } catch (error) {
                     console.error('Payment initialization failed:', error);
-                    alert(`Payment failed: ${error.message}`);
+                    Swal.fire({
+                        title: 'Payment Error',
+                        text: `Payment initialization failed: ${error.message}`,
+                        icon: 'error',
+                        confirmButtonColor: '#3399cc'
+                    });
                 }
-            } else {
+            } else {    
                 checkoutForm.submit();
             }
-        });
+            
+        } catch (error) {
+            console.error('Stock validation error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to validate product stock. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#3399cc'
+            });
+            return;
+        }
     });
-</script>
 
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkedAddressRadio = document.querySelector('input[name="selectedAddress"]:checked');
+        if (checkedAddressRadio) {
+            const addressBlock = checkedAddressRadio.closest('.address-block');
+            if (addressBlock) {
+                addressBlock.classList.add('selected');
+            }
+        }
+    });
+});
+</script>
 <%- include('../../views/partials/user/footer') %>

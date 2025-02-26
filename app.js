@@ -1,31 +1,30 @@
 const express = require('express');
 const app = express();
 const env = require('dotenv').config();
-console.log('Env loaded:', process.env.RAZORPAY_KEY_ID ? 'Razorpay key found' : 'Razorpay key missing');
-const session = require('express-session')
+const session = require('express-session');
 const db = require('./config/db');
 const path = require('path');
-const userRouter = require('./routes/userRouter')
+const userRouter = require('./routes/userRouter');
 const passport = require('./config/passport');
-const adminRouter = require('./routes/adminRouter')
-const MongoStore = require('connect-mongo'); 
-const setUserInLocals = require('./middlewares/setUserInLocals')
-// const nocache = require('nocache');
+const adminRouter = require('./routes/adminRouter');
+const MongoStore = require('connect-mongo');
+const setUserInLocals = require('./middlewares/setUserInLocals');
+
 db();
 
-// app.use(nocache());
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(session({
-    secret:process.env.SESSION_SECRET,
-    resave:false,
-    saveUninitialized:true,
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
     store: MongoStore.create({
         mongoUrl: 'mongodb://localhost:27017/yourdb',
         collectionName: 'sessions'
     }),
-    cookie:{
-        secure:false,
+    cookie: {
+        secure: false,
         maxAge: 24 * 3600 * 1000
     }
 }));
@@ -38,19 +37,31 @@ app.use((req, res, next) => {
     next();
 });
 
-app.set('view engine','ejs');
+app.set('view engine', 'ejs');
 app.set('views', [
     path.join(__dirname, 'views/user'),
-    path.join(__dirname, 'views/admin'), 
+    path.join(__dirname, 'views/admin'),
 ]);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/',userRouter);
-app.use('/admin',adminRouter)
+app.use('/', userRouter);
+app.use('/admin', adminRouter);
 
-app.listen(process.env.PORT,()=>{
-    console.log('server started at port '+process.env.PORT)
-})
+app.use((req, res, next) => {
+    res.status(404);
+    const isAdminRoute = req.originalUrl.startsWith('/admin');
 
+    try {
+        res.render(isAdminRoute ? "admin-error" : "page-404");
+    } catch (error) {
+        console.error("Error rendering 404 page:", error);
+        res.send("404 Page Not Found");
+    }
+});
 
-module.exports = app
+app.listen(process.env.PORT, () => {
+    console.log('Server started at port ' + process.env.PORT);
+});
+
+module.exports = app;

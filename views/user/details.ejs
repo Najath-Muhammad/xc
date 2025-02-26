@@ -1,0 +1,174 @@
+<%- include('../../views/partials/user/header') %>
+
+<!-- Shop Details Section Begin -->
+<section class="shop-details">
+    <div class="container">
+        <div class="order-container" style="max-width: 1200px; margin: 50px auto; padding: 30px; background-color: #fff; border-radius: 8px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="order-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ebebeb; padding-bottom: 20px; margin-bottom: 30px;">
+                        <div>
+                            <h4 style="font-weight: 700;">Order #<%= order.orderId %></h4>
+                            <p style="color: #666;">Placed on <%= new Date(order.createdOn).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                        </div>
+                        <div>
+                            <% let statusClass = ""; %>
+                            <% let statusBg = "#f8f9fa"; %>
+                            <% let statusColor = "#212529"; %>
+                            
+                            <% if (order.status === 'Pending') { 
+                                statusBg = "#FFF3CD"; statusColor = "#856404"; 
+                            } else if (order.status === 'Processing') { 
+                                statusBg = "#D1ECF1"; statusColor = "#0C5460"; 
+                            } else if (order.status === 'Shipped') { 
+                                statusBg = "#D4EDDA"; statusColor = "#155724"; 
+                            } else if (order.status === 'Delivered') { 
+                                statusBg = "#C3E6CB"; statusColor = "#155724"; 
+                            } else if (order.status === 'Cancelled') { 
+                                statusBg = "#F8D7DA"; statusColor = "#721C24"; 
+                            } else if (order.status === 'Return Requested' || order.status === 'Returned') { 
+                                statusBg = "#E2E3E5"; statusColor = "#383D41"; 
+                            } %>
+                            
+                            <span style="display: inline-block; padding: 6px 15px; border-radius: 20px; font-weight: 600; font-size: 14px; background-color: <%= statusBg %>; color: <%= statusColor %>;">
+                                <%= order.status %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <div style="border: 1px solid #ebebeb; border-radius: 5px; padding: 20px; margin-bottom: 30px;">
+                        <h5 style="margin-top: 0; border-bottom: 1px solid #ebebeb; padding-bottom: 10px; margin-bottom: 15px; font-size: 16px; font-weight: 600;">
+                            <i class="fa fa-shipping-fast"></i> Shipping Address
+                        </h5>
+                        <p style="margin-bottom: 5px;"><strong><%= address.name %></strong></p>
+                        <p style="margin-bottom: 5px;"><%= address.addressLine1 %></p>
+                        <% if (address.addressLine2) { %>
+                            <p style="margin-bottom: 5px;"><%= address.addressLine2 %></p>
+                        <% } %>
+                        <p style="margin-bottom: 5px;"><%= address.city %>, <%= address.state %> <%= address.pincode %></p>
+                        <p style="margin-bottom: 5px;"><%= address.country %></p>
+                        <p style="margin-bottom: 0;">Phone: <%= address.phone %></p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div style="border: 1px solid #ebebeb; border-radius: 5px; padding: 20px; margin-bottom: 30px;">
+                        <h5 style="margin-top: 0; border-bottom: 1px solid #ebebeb; padding-bottom: 10px; margin-bottom: 15px; font-size: 16px; font-weight: 600;">
+                            <i class="fa fa-info-circle"></i> Order Information
+                        </h5>
+                        <p style="margin-bottom: 8px;"><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                        <p style="margin-bottom: 8px;"><strong>Payment Status:</strong> <%= order.paymentStatus %></p>
+                        <% if (order.invoiceDate) { %>
+                            <p style="margin-bottom: 8px;"><strong>Invoice Date:</strong> <%= new Date(order.invoiceDate).toLocaleDateString() %></p>
+                        <% } %>
+                        <% if (order.status === 'Cancelled') { %>
+                            <p style="margin-bottom: 8px;"><strong>Cancellation Reason:</strong> <%= order.cancelReason || 'Not specified' %></p>
+                        <% } %>
+                        <% if (order.status === 'Return Requested' || order.status === 'Returned') { %>
+                            <p style="margin-bottom: 8px;"><strong>Return Reason:</strong> <%= order.returnReason || 'Not specified' %></p>
+                            <p style="margin-bottom: 8px;"><strong>Return Requested:</strong> <%= new Date(order.returnRequestedAt).toLocaleDateString() %></p>
+                            <% if (order.returnedAt) { %>
+                                <p style="margin-bottom: 0;"><strong>Returned On:</strong> <%= new Date(order.returnedAt).toLocaleDateString() %></p>
+                            <% } %>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-12">
+                    <div style="margin-bottom: 30px;">
+                        <h5 style="margin-bottom: 20px; font-weight: 600;">Ordered Items</h5>
+                        
+                        <% order.orderedItems.forEach(item => { %>
+                            <div style="display: flex; border-bottom: 1px solid #ebebeb; padding: 15px 0; margin-bottom: 15px;">
+                                <div style="width: 100px; height: 100px; background-image: url('<%= item.product.productImage[0] %>'); background-size: cover; background-position: center; border-radius: 5px; margin-right: 20px;"></div>
+                                <div style="flex-grow: 1;">
+                                    <h6 style="margin-bottom: 5px; font-weight: 600;">
+                                        <a href="/product/<%= item.product._id %>" style="color: #111111; text-decoration: none;">
+                                            <%= item.product.productName %>
+                                        </a>
+                                    </h6>
+                                    <p style="margin-bottom: 5px; color: #666;"><%= item.product.brand %> | <%= item.product.color %></p>
+                                    <p style="margin-bottom: 0; color: #666; font-size: 14px;">Quantity: <%= item.quantity %></p>
+                                </div>
+                                <div style="min-width: 120px; text-align: right;">
+                                    <% if (item.product.salePrice < item.product.regularPrice) { %>
+                                        <div><s style="color: #b7b7b7;">₹<%= item.product.regularPrice.toFixed(2) %></s></div>
+                                        <div style="font-weight: 700; color: #111111;">₹<%= item.product.salePrice.toFixed(2) %></div>
+                                    <% } else { %>
+                                        <div style="font-weight: 700; color: #111111;">₹<%= item.product.regularPrice.toFixed(2) %></div>
+                                    <% } %>
+                                    <div style="margin-top: 5px; font-size: 14px; color: #666;">Total: ₹<%= (item.price * item.quantity).toFixed(2) %></div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-7">
+                    <div style="margin-top: 30px;">
+                        <a href="/orders" class="site-btn" style="background-color: #f5f5f5; color: #111111; border: 1px solid #e1e1e1; margin-right: 10px;">
+                            <i class="fa fa-arrow-left"></i> Back to Orders
+                        </a>
+                        
+                        <% if (order.status === 'Delivered') { %>
+                            <a href="/orders/<%= order.orderId %>/return" class="site-btn" style="background-color: #f5f5f5; color: #111111; border: 1px solid #e1e1e1; margin-right: 10px;">
+                                Request Return
+                            </a>
+                        <% } %>
+                        
+                        <% if (order.status === 'Pending' || order.status === 'Processing') { %>
+                            <a href="/orders/<%= order.orderId %>/cancel" class="site-btn" style="background-color: #e53637; color: white; margin-right: 10px;">
+                                Cancel Order
+                            </a>
+                        <% } %>
+                        
+                        <a href="/orders/<%= order.orderId %>/invoice" class="site-btn">
+                            <i class="fa fa-file-invoice"></i> Download Invoice
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-5">
+                    <div style="border: 1px solid #ebebeb; border-radius: 5px; padding: 20px; margin-left: auto;">
+                        <h5 style="margin-top: 0; margin-bottom: 20px; font-weight: 600;">Order Summary</h5>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Subtotal:</span>
+                            <span>₹<%= order.totalPrice.toFixed(2) %></span>
+                        </div>
+                        
+                        <% if (order.discount > 0) { %>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Discount:</span>
+                                <span>-₹<%= order.discount.toFixed(2) %></span>
+                            </div>
+                        <% } %>
+                        
+                        <% if (order.couponApplied) { %>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Coupon Applied:</span>
+                                <span>Yes</span>
+                            </div>
+                        <% } %>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ebebeb; font-weight: 700;">
+                            <span>Total:</span>
+                            <span>₹<%= order.finalAmount.toFixed(2) %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<%- include('../../views/partials/user/footer') %>

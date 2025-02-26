@@ -65,19 +65,28 @@ const getOrderDetails = async (req, res) => {
     }
 
     const user = await User.findById(orderDetails.userId).select('name email phone');
-    console.log('user:',user)
-    const address = await Address.findById(orderDetails.address).select('address')
-    console.log('address',address)
+    console.log('user:', user);
+    
+    const addressData = await Address.findOne({_id: orderDetails.address}).select('address');
+    const address = addressData?.address[0];
+    console.log('address', address);
+    
     const productsDetails = await Promise.all(
       orderDetails.orderedItems.map(async (item) => {
-        const product = await Product.findById(item.product).select('name productId images price');
+        // Updated to use fields that match the schema
+        const product = await Product.findById(item.product).select('productName productImage regularPrice salePrice');
         return {
           ...item.toObject(),
-          productDetails: product
+          productDetails: {
+            name: product?.productName || 'Product Not Found',
+            price: product?.salePrice || product?.regularPrice || 0,
+            productImage: product?.productImage || []
+          },
+          productId: item.product // Ensuring productId is available for display
         };
       })
     );
-    console.log('productsDetails:',productsDetails);
+    console.log('productsDetails:', productsDetails);
 
     res.render("orderDetailsadm", {
       order: orderDetails,
@@ -90,7 +99,6 @@ const getOrderDetails = async (req, res) => {
     res.redirect("/admin/error");
   }
 };
-
 const updateOrderStatus = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -140,7 +148,7 @@ const updateOrderStatus = async (req, res) => {
     );
 
     // If the status is 'Return Accepted' or 'Completed', credit the final amount to the user's wallet
-    if (status === 'Return Accepted' || status === 'Completed') {
+    if (status === 'Return Accepted') {
       const wallet = await Wallet.findOne({ userId });
 
       if (!wallet) {

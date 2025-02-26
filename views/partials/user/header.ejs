@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zxx">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -10,22 +10,22 @@
     <title>Male-Fashion | Template</title>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-5e2ESR8Ycmos6g3gAKr1Jvwye8sW4U1u/cAKulfVJnkakCcMqhOudbtPnvJ+nbv7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Css Styles -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
-    <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
-    <link rel="stylesheet" href="css/elegant-icons.css" type="text/css">
-    <link rel="stylesheet" href="css/magnific-popup.css" type="text/css">
-    <link rel="stylesheet" href="css/nice-select.css" type="text/css">
-    <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css">
-    <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
-    <link rel="stylesheet" href="css/style.css" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/elegant-icons/0.0.1/style.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/SlickNav/1.0.10/slicknav.min.css">
+    
+    <!-- Custom Styles - Keep your custom styles in the root CSS or use an absolute path -->
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
     <style>
         .fa-wallet {
             font-size: 24px;
@@ -83,6 +83,28 @@
             padding: 2px 6px;
             font-size: 12px;
         }
+        
+        /* Wallet icon styles */
+        .wallet-link {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .wallet-link i {
+            font-size: 20px;
+            color: #000;
+        }
+        
+        .wallet-link span {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #e53637;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
     </style>
 </head>
 
@@ -110,8 +132,8 @@
             </div>
         </div>
         <div class="offcanvas__nav__option">
-            <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
-            <a href="#"><img src="img/icon/heart.png" alt=""></a>
+            <a href="#" class="search-switch"><img src="/img/icon/search.png" alt=""></a>
+            <a href="#"><img src="/img/icon/heart.png" alt=""></a>
             <a href="/wallet"><i class="fas fa-wallet"></i></a>
         </div>
         <div id="mobile-menu-wrap"></div>
@@ -122,130 +144,85 @@
     <!-- Offcanvas Menu End -->
 
     <!-- Header Section Begin -->
-<!-- Header Section Begin -->
-<header class="header">
-    <div class="header__top">
+    <header class="header">
+        <div class="header__top">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 col-md-7">
+                        <div class="header__top__left">
+                            <p>Free shipping, 30-day return or refund guarantee.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-5">
+                        <div class="header__top__right">
+                            <div class="header__top__links">
+                                <%if(locals.user){%>
+                                    <div class="dropdown">
+                                        <a href="#" class="sing-in-link"><%=locals.user.fullname%></a>
+                                        <div class="dropdown-content">
+                                            <a href="/profile">Profile</a>
+                                            <a href="/logout">Logout</a>
+                                        </div>
+                                    </div>
+                                        <a href="/cart" class="cart-link">
+                                            <i class="fa fa-shopping-cart"></i> 
+                                        </a>
+                                <%} else { %>
+                                    <a href="/signup">Sign Up</a>
+                                    <a href="/login">Log In</a>
+                              
+                                <% } %>
+                            </div>
+                            <div class="header__top__hover">
+                                <span>Usd <i class="arrow_carrot-down"></i></span>
+                                <ul>
+                                    <li>USD</li>
+                                    <li>EUR</li>
+                                    <li>USD</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="container">
             <div class="row">
-                <div class="col-lg-6 col-md-7">
-                    <div class="header__top__left">
-                        <p>Free shipping, 30-day return or refund guarantee.</p>
+                <div class="col-lg-3 col-md-3">
+                    <div class="header__logo">
+                        <a href="/"><img src="/img/logo.png" alt=""></a>
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-5">
-                    <div class="header__top__right">
-                        <div class="header__top__links">
-                            <%if(locals.user){%>
-                                <div class="dropdown">
-                                    <a href="#" class="sing-in-link"><%=locals.user.fullname%></a>
-                                    <div class="dropdown-content">
-                                        <a href="/profile">Profile</a>
-                                        <a href="/logout">Logout</a>
-                                    </div>
-                                </div>
-                                    <a href="/cart" class="cart-link">
-                                        <i class="fa fa-shopping-cart"></i> 
-                                    </a>
-                            <%} else { %>
-                                <a href="/signup">Sign Up</a>
-                                <a href="/login">Log In</a>
-                          
-                            <% } %>
-                        </div>
-                        <div class="header__top__hover">
-                            <span>Usd <i class="arrow_carrot-down"></i></span>
-                            <ul>
-                                <li>USD</li>
-                                <li>EUR</li>
-                                <li>USD</li>
-                            </ul>
-                        </div>
+                <div class="col-lg-6 col-md-6">
+                    <nav class="header__menu mobile-menu">
+                        <ul>
+                            <li class="active"><a href="/">Home</a></li>
+                            <li><a href="/products">Shop</a></li>
+                            <li><a href="#">Pages</a>
+                                <ul class="dropdown">
+                                    <li><a href="/about">About Us</a></li>
+                                    <li><a href="/shop-details">Shop Details</a></li>
+                                    <li><a href="/cart">Shopping Cart</a></li>
+                                    <li><a href="/checkout">Check Out</a></li>
+                                    <li><a href="/blog-details">Blog Details</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="/blog">Blog</a></li>
+                            <li><a href="/contact">Contacts</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <div class="header__nav__option">
+                        <a href="#" class="search-switch"><img src="/img/icon/search.png" alt=""></a>
+                        <a href="/wishlist"><img src="/img/icon/heart.png" alt=""></a>
+                        <a href="/wallet" class="wallet-link">
+                            <i class="fa fa-money"></i>
+                           
+                        </a>
                     </div>
                 </div>
             </div>
+            <div class="canvas__open"><i class="fa fa-bars"></i></div>
         </div>
-    </div>
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-3 col-md-3">
-                <div class="header__logo">
-                    <a href="./index.html"><img src="img/logo.png" alt=""></a>
-                </div>
-            </div>
-            <div class="col-lg-6 col-md-6">
-                <nav class="header__menu mobile-menu">
-                    <ul>
-                        <li class="active"><a href="/">Home</a></li>
-                        <li><a href="/products">Shop</a></li>
-                        <li><a href="#">Pages</a>
-                            <ul class="dropdown">
-                                <li><a href="./about.html">About Us</a></li>
-                                <li><a href="./shop-details.html">Shop Details</a></li>
-                                <li><a href="./shopping-cart.html">Shopping Cart</a></li>
-                                <li><a href="./checkout.html">Check Out</a></li>
-                                <li><a href="./blog-details.html">Blog Details</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="./blog.html">Blog</a></li>
-                        <li><a href="./contact.html">Contacts</a></li>
-                    </ul>
-                </nav>
-            </div>
-            <div class="col-lg-3 col-md-3">
-                <div class="header__nav__option">
-                    <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
-                    <a href="/wishlist"><img src="img/icon/heart.png" alt=""></a>
-                    <a href="/wallet" class="wallet-link">
-                        <i class="fa fa-money"></i>
-                       
-                    </a>
-                    <!-- <div class="price">₹0.00</div> -->
-                </div>
-            </div>
-        </div>
-        <div class="canvas__open"><i class="fa fa-bars"></i></div>
-    </div>
-</header>
-
-<style>
-    /* Wallet icon styles */
-    .wallet-link {
-        position: relative;
-        display: inline-block;
-    }
-    
-    .wallet-link i {
-        font-size: 20px;
-        color: #000;
-    }
-    
-    .wallet-link span {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background-color: #e53637;
-        color: white;
-        border-radius: 50%;
-        padding: 2px 6px;
-        font-size: 12px;
-    }
-
-    /* Dropdown styles */
-    .dropdown {
-        position: relative;
-        display: inline-block;
-    }
-
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #f9f9f9;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        z-index: 1;
-    }
-
-    .dropdown:hover .dropdown-content {
-        display: block;
-    }
-</style>
+    </header>
