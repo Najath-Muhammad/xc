@@ -273,8 +273,7 @@
 
     async function processCroppedImages() {
         const promises = [];
-        
-        // Process only the inputs that have files
+
         for (let i = 1; i <= 3; i++) {
             const input = document.getElementById(`input${i}`);
             if (input.files && input.files.length > 0 && croppers[i]) {
@@ -382,12 +381,10 @@
             let cropperContainer = image.parentNode;
             cropperContainer.style.display = 'block';
             
-            // Destroy existing cropper if it exists
             if (croppers[index]) {
                 croppers[index].destroy();
             }
             
-            // Create new cropper
             let cropper = new Cropper(image, {
                 aspectRatio: 1,
                 viewMode: 1,

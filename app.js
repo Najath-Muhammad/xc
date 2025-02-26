@@ -53,7 +53,7 @@ app.use((req, res, next) => {
     const isAdminRoute = req.originalUrl.startsWith('/admin');
 
     try {
-        res.render(isAdminRoute ? "admin-error" : "page-404");
+        res.render(isAdminRoute ? "pageError" : "page-404");
     } catch (error) {
         console.error("Error rendering 404 page:", error);
         res.send("404 Page Not Found");

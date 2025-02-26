@@ -45,38 +45,38 @@ router.get('/products', userAuth,productController.loadProductsPage);
 router.get('/productDetails', userAuth,productController.productDetails);
 router.post('/applyFilters',userAuth,productController.applyFilters);
 
-router.get('/profile', profileController.loadProfile);
-router.post('/updateName', profileController.updateName);
-router.post('/hhsendOtpForEmailUpdate', profileController.sendOtpForEmailUpdate);
-router.post('/fverifyEmailOtp', profileController.verifyEmailOtp);
-router.post('/updatePhone', profileController.updatePhone);
-router.post('/addresses', profileController.addAddress);
-router.post('/deleteAddress', profileController.deleteAddress);
-router.post('/editAddress', profileController.editAddress);
-router.get('/profile/:orderId', orderController.loadOrderDetails)
-router.post('/cancelOrderReason',profileController.cancelOrderReason)
-router.post('/cancelOrder',profileController.cancelOrder)
-router.post('/createOrder', orderController.createOrder);
-router.post('/returnRequestget',profileController.returnRequestget)
-router.post('/returnRequest',profileController.submitReturnRequest)
-router.post('/verifyPayment', orderController.verifyPayment);
-router.post('/updatePaymentStatus', orderController.updatePaymentStatus);
-router.get('/download-invoice/:orderId',orderController.downloadInvoice)
+router.get('/profile', userAuth,profileController.loadProfile);
+router.post('/updateName', userAuth,profileController.updateName);
+router.post('/hhsendOtpForEmailUpdate', userAuth,profileController.sendOtpForEmailUpdate);
+router.post('/fverifyEmailOtp', userAuth,profileController.verifyEmailOtp);
+router.post('/updatePhone', userAuth,profileController.updatePhone);
+router.post('/addresses', userAuth,profileController.addAddress);
+router.post('/deleteAddress', userAuth,profileController.deleteAddress);
+router.post('/editAddress', userAuth,profileController.editAddress);
+router.get('/profile/:orderId', userAuth,orderController.loadOrderDetails)
+router.post('/cancelOrderReason',userAuth,profileController.cancelOrderReason)
+router.post('/cancelOrder',userAuth,profileController.cancelOrder)
+router.post('/createOrder', userAuth,orderController.createOrder);
+router.post('/returnRequestget',userAuth,profileController.returnRequestget)
+router.post('/returnRequest',userAuth,profileController.submitReturnRequest)
+router.post('/verifyPayment', userAuth,orderController.verifyPayment);
+router.post('/updatePaymentStatus', userAuth,orderController.updatePaymentStatus);
+router.get('/download-invoice/:orderId',userAuth,orderController.downloadInvoice)
 
 
-router.post('/addToCart',cartController.addToCart)
-router.get('/cart', cartController.loadCartPage);
-router.post('/cart/removeItem',cartController.removeItemFromCart)
-router.post('/cart/updateItem', cartController.updateItemInCart);
+router.post('/addToCart',userAuth,cartController.addToCart)
+router.get('/cart', userAuth,cartController.loadCartPage);
+router.post('/cart/removeItem',userAuth,cartController.removeItemFromCart)
+router.post('/cart/updateItem', userAuth,cartController.updateItemInCart);
 
-router.get('/checkout',checkoutController.loadCheckout)
-router.get('/validateStock',checkoutController.validateStock)
+router.get('/checkout',userAuth,checkoutController.loadCheckout)
+router.get('/validateStock',userAuth,checkoutController.validateStock)
 
-router.post('/placeOrder',orderController.loadOrderPlaced)
+router.post('/placeOrder',userAuth,orderController.loadOrderPlaced)
 
-router.get('/wishlist',wishlistController.loadWishlist)
-router.post('/addToWishlist',wishlistController.addToWishlist)
-router.post('/wishlist/removeItem',wishlistController.removeItemFromWishlist)
+router.get('/wishlist',userAuth,wishlistController.loadWishlist)
+router.post('/addToWishlist',userAuth,wishlistController.addToWishlist)
+router.post('/wishlist/removeItem',userAuth,wishlistController.removeItemFromWishlist)
 
-router.get('/wallet',walletController.getWallet)
+router.get('/wallet',userAuth,walletController.getWallet)
 module.exports = router;

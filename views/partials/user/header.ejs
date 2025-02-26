@@ -105,6 +105,31 @@
             padding: 2px 6px;
             font-size: 12px;
         }
+        .logoText {
+            font-size: 26px;
+            font-weight: 800;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+            padding: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .logoText:hover {
+            color: #e53637;
+            transform: scale(1.05);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Make logo responsive */
+        @media (max-width: 768px) {
+            .logoText {
+                font-size: 24px;
+                letter-spacing: 1px;
+            }
+        }
     </style>
 </head>
 
@@ -190,7 +215,7 @@
             <div class="row">
                 <div class="col-lg-3 col-md-3">
                     <div class="header__logo">
-                        <a href="/"><img src="/img/logo.png" alt=""></a>
+                        <a href="/"><span class="logoText">BEATS</span></a>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">
