@@ -150,7 +150,7 @@ const exportSalesReport = async (req, res) => {
                 $gte: dateRange.start,
                 $lte: dateRange.end
             },
-            status: { $nin: ['cancelled'] }
+            status: { $in: ['Delivered'] }
         }).populate('userId', 'name email');
         console.log('orders:', orders);
 
