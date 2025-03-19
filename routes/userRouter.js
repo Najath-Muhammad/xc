@@ -41,9 +41,9 @@ router.get('/sendOtpForEmailUpdate', userController.sendOtpForEmailUpdateGet);
 router.post('/emailUpdateOtp', userController.emailUpdateOtp);
 router.post('/resendOtp',userController.resendOtpForEmailUpdate);
 
-router.get('/products', userAuth,productController.loadProductsPage);
-router.get('/productDetails', userAuth,productController.productDetails);
-router.post('/applyFilters',userAuth,productController.applyFilters);
+router.get('/products', productController.loadProductsPage);
+router.get('/productDetails', productController.productDetails);
+router.post('/applyFilters',productController.applyFilters);
 
 router.get('/profile', userAuth,profileController.loadProfile);
 router.post('/updateName', userAuth,profileController.updateName);
